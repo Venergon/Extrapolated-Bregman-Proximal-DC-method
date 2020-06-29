@@ -7,7 +7,7 @@ n = 100;
 m = 101;
 density = 0.5;
 noise_mu = 0;
-noise_sigma = 1;
+noise_sigma = 0.2;
 
 A = rand(n, m);
 
@@ -47,6 +47,9 @@ obj_least_squares = obj_fn(x_least_squares);
 b_diff_denoised = norm(b_denoised - b, 2)/norm(b, 2);
 b_diff_hat = norm(b_hat - b, 2)/norm(b, 2);
 b_diff_least_squares = norm(b_least_squares - b, 2)/norm(b, 2);
+
+x_diff_denoised = norm(x_denoised - x_hat, 2)/norm(x_hat, 2);
+x_diff_least_squares = norm(x_least_squares - x_hat, 2)/norm(x_hat, 2);
 
 function [dg] = dg_2_norm(x) 
     if x == 0
