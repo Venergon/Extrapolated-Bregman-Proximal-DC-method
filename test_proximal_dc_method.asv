@@ -1,0 +1,30 @@
+USE_2_NORM = false;
+
+A = [1, -1, 0, 0, 0, 0;
+    1, 0, -1, 0, 0, 0;
+    0, 1, 1, 1, 0, 0;
+    2, 2, 0, 0, 1, 0;
+    1, 1, 0, 0, 0, -1];
+
+x_ideal = [0; 0; 0; 20; 40; -18];
+b = A*x_ideal;
+
+x0 = x_ideal;%[1; 1; 1; 1; 1; 1];
+% g = ||x||_2, so dg = 
+lambda = 10;
+
+if USE_2_NORM
+    dg = @(x) (x./norm(x, 2));
+    obj_fn = @(x) (norm(A*x-b)^2 + lambda *(norm(x, 1) - norm(x, 2)));
+else
+    dg = @(x) (0);
+    obj_fn = @(x) (norm(A*x-b)^2 + lambda * norm(x, 1));
+end
+    
+tol = 1e-1;
+stop_fn = @(x_prev, x_curr)(obj_fn(x_curr) - obj_fn(x_p < tol);
+
+
+
+x_approx = ExtendedProximalDCMethod(A, b, x0, dg, lambda, stop_fn);
+b_approx = A*x_approx;
