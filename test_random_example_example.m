@@ -17,7 +17,7 @@ b_hat = A*x_hat;
 noise = normrnd(noise_mu, noise_sigma, n, 1);
 b = b_hat + noise;
 
-x0 = zeros(m, 1);
+x0 = A \ b;
 % g = ||x||_2, so dg = 
 
 
