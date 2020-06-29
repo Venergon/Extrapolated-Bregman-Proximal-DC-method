@@ -13,8 +13,9 @@ function [x] = calculate_argmin(A, b, w, xi, L, t, x_curr, lambda)
 % Represent \nabla f and \nabla h by df and dh respectively
 df = A'*(A*w - b);
 
-step_size = 0.05;
 n = length(x_curr);
+step_size = 1/n^2;
+
 dh = @(x) (lambda*sign(x) + df - xi.*ones(n, 1) + L.*(x-w) + (1/t).*(x-x_curr));
 
 x = zeros(n, 1);

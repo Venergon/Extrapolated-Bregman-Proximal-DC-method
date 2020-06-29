@@ -3,8 +3,8 @@
 USE_2_NORM = false;
 rtol = 1e-3;
 lambda = 10;
-n = 10;
-m = 11;
+n = 100;
+m = 101;
 density = 0.5;
 noise_mu = 0;
 noise_sigma = 0.5;
