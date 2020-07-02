@@ -1,6 +1,6 @@
 USE_2_NORM = true;
 tol = 1e-3;
-lambda = 0.01;
+lambda = 0.1;
 
 
 A = [1, -1, 0, 0, 0, 0;
@@ -12,12 +12,17 @@ A = [1, -1, 0, 0, 0, 0;
 x_ideal = [0; 0; 0; 20; 40; -18];
 b = A*x_ideal;
 
-x0 = [1; 1; 1; 1; 1; 1];
+% Because there's no noise, the least squares solution will give an exact
+% solution to the ||Ax - b|| = 0 but not necessarily the solution to the
+% penalty problem (running it locally gives me ~[10;10;10;0;0;2], which is
+% not optimal. Starting from a zero vector also results in a solution very
+% close to the optimum, so either work as a starting guess.
+x0 = A \ b;%zeros(6, 1);
 % g = ||x||_2, so dg = 
 
 
 if USE_2_NORM
-    dg = @(x) (x./norm(x, 2));
+    dg = @(x) (dg_2_norm(x));
     obj_fn = @(x) (norm(A*x-b)^2 + lambda *(norm(x, 1) - norm(x, 2)));
 else
     dg = @(x) (0);
@@ -28,9 +33,18 @@ end
 stop_fn = @(x_prev, x_curr)(obj_fn(x_curr) > obj_fn(x_prev) && obj_fn(x_curr) - obj_fn(x_prev) < tol);
 
 
+threshold_iterations = 10;
 
-x_approx = ExtendedProximalDCMethod(A, b, x0, dg, lambda, stop_fn);
+x_approx = ExtendedProximalDCMethod(A, b, x0, dg, lambda, threshold_iterations, stop_fn);
 b_approx = A*x_approx;
 
 obj_ideal = obj_fn(x_ideal);
 obj_approx = obj_fn(x_approx);
+
+function [dg] = dg_2_norm(x) 
+    if x == 0
+        dg = 0;
+    else
+        dg = x ./ norm(x, 2);
+    end
+end

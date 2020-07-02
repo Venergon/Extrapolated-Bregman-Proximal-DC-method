@@ -1,13 +1,14 @@
 % Test ExtendedProximalDCMethod using a randomly generated matrix of size
 % nXm, with some gaussian noise
 USE_2_NORM = true;
-rtol = 1e-3;
+rtol = 1e-5;
 lambda = 10;
 n = 100;
 m = 101;
-density = 0.5;
+density = 0.1;
 noise_mu = 0;
-noise_sigma = 0.2;
+noise_sigma = 0.1;
+threshold_iterations = 100;
 
 A = rand(n, m);
 
@@ -28,13 +29,10 @@ else
     dg = @(x) (0);
     obj_fn = @(x) (norm(A*x-b)^2 + lambda * norm(x, 1));
 end
-    
 
 stop_fn = @(x_prev, x_curr)(obj_fn(x_curr) >= obj_fn(x_prev) && obj_fn(x_curr) - obj_fn(x_prev) < rtol*obj_fn(x_hat));
 
-
-
-x_denoised = ExtendedProximalDCMethod(A, b, x0, dg, lambda, stop_fn);
+x_denoised = ExtendedProximalDCMethod(A, b, x0, dg, lambda, threshold_iterations, stop_fn);
 b_denoised = A*x_denoised;
 
 x_least_squares = A \ b;

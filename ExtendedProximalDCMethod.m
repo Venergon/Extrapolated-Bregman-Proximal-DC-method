@@ -1,14 +1,16 @@
-function [x] = ExtendedProximalDCMethod(A, b, x0, dg, lambda, stop_fn)
+function [x] = ExtendedProximalDCMethod(A, b, x0, dg_2, lambda, threshold_iterations, stop_fn)
 % Extended Proximal DC Method: Find an approximation to the minimum of
-% 1/2*|Ax-b|^2 + lambda*(|x|_1 - g(x))
+% 1/2*|Ax-b|^2 + lambda*(g_1(x) - g_2(x)), where g_1(x) = ||x||_1
 % using the Extended Proximal DC method
 % 
 % Inputs:
 %  A : matrix used for the minimization of |Ax-b|
 %  b : desired result vector, used in the minimization of |Ax - b|
 %  x0 : initial guess for x
-%  dg(x) : a function that returns a member of the subderivative of g at x 
+%  dg_2(x) : a function that returns a member of the subderivative of g_2 at x 
 %  lambda : penalty parameter
+%  threshold_iterations: The number of iterations used for soft
+%  thresholding
 %  stop_fn(x_prev, x_curr) : The condition on x_k and x_{k-1} under which to stop
 % 
 % Outputs:
@@ -35,24 +37,23 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr)))
     %% Step 1a: Choose alpha_k >= 0 and compute w_k = x_k + alpha_k*(x_k -
     % x_{k-1})
     
-    % TODO: temporarily choosing alpha_k = 1, replace with some way to
+    % TODO: temporarily choosing alpha_k = 0.2, replace with some way to
     % choose alpha_k
-    alpha = 0;
+    alpha = 0.5;
     
     w = x_curr + alpha*(x_curr - x_prev);
     
     %% Step 1b: Compute xi_k \in \partial{lambda * g}(x_k)
-    xi = lambda * dg(x_curr);
+    xi = lambda * dg_2(x_curr);
     
     %% Step 2: Compute the step size t_k and  update x_{k+1} by letting
     % x_{k+1} \in argmin_{x} {lambda*|x|_1 + <\nabla f(w_k) - xi_k, x - w_k> +
     % L/2*||x - w_k||_2^2 + 1/t_k*D(x, x_k)
     
     % TODO: Currently got a static step size t_k = 1
-    t = 0.0001;
+    t = 1;
     
-    % TODO: Currently uses euclidean distance rather than bregman distance
-    x_next = calculate_argmin(A, b, w, xi, L, t, x_curr, lambda)
+    x_next = calculate_argmin(A, b, w, xi, L, t, x_curr, lambda, threshold_iterations);
    
     %% Shuffle x_prev, x_curr, x_next to represent moving to the next value of k
     x_prev = x_curr;
