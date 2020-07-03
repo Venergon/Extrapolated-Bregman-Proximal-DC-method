@@ -18,8 +18,6 @@ b = A*x_ideal;
 % not optimal. Starting from a zero vector also results in a solution very
 % close to the optimum, so either work as a starting guess.
 x0 = A \ b;%zeros(6, 1);
-% g = ||x||_2, so dg = 
-
 
 if USE_2_NORM
     dg = @(x) (dg_2_norm(x));
