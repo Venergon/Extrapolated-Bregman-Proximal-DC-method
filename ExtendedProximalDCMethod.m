@@ -44,7 +44,8 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr)))
     w = x_curr + alpha*(x_curr - x_prev);
     
     %% Step 1b: Compute xi_k \in \partial{lambda * g}(x_k)
-    xi = lambda * dg_2(x_curr);
+    % lambda already comes from dg_2
+    xi = dg_2(x_curr);
     
     %% Step 2: Compute the step size t_k and  update x_{k+1} by letting
     % x_{k+1} \in argmin_{x} {lambda*|x|_1 + <\nabla f(w_k) - xi_k, x - w_k> +
