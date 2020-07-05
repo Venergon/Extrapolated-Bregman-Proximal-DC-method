@@ -37,7 +37,7 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr)))
     %% Step 1a: Choose alpha_k >= 0 and compute w_k = x_k + alpha_k*(x_k -
     % x_{k-1})
     
-    % TODO: temporarily choosing alpha_k = 0.2, replace with some way to
+    % TODO: temporarily choosing alpha_k = 0.5, replace with some way to
     % choose alpha_k
     alpha = 0.5;
     
