@@ -11,6 +11,7 @@ noise_sigma = 0.1;
 threshold_iterations = 100;
 theta_MCP = 5;
 theta_SCAD = 5;
+a = 1;
 
 A = rand(n, m);
 
@@ -31,11 +32,13 @@ dg_0 = @(x) (0);
 % All three use the L1 norm as the positive convex part
 dg_MCP = @(x) (lambda.*sign(x).*min(1, abs(x)/(theta_MCP*lambda)));
 dg_SCAD = @(x) (sign(x).*(min(theta_SCAD*lambda, abs(x)) - lambda)/(theta_SCAD - 1));
+dg_TL1 = @(x) (sign(x).*(a+1)/(a) - sign(x).*(a^2 + a)./(a + abs(x))^2);
 
 obj_fn_L1_L2 = @(x) (norm(A*x-b)^2 + lambda *(norm(x, 1) - norm(x, 2)));
 obj_fn_L1 = @(x) (norm(A*x-b)^2 + lambda * norm(x, 1));
 obj_fn_MCP = @(x) (norm(A*x-b)^2 + penalty_MCP(x, lambda, theta_MCP));
 obj_fn_SCAD = @(x) (norm(A*x-b)^2 + penalty_SCAD(x, lambda, theta_SCAD));
+obj_fn_TL1 = @(x) (norm(A*x-b)^2 + (a+1).*abs(x)./(a + abs(x)));
 
 stop_fn = @(obj_fn)  (@(x_prev, x_curr)(obj_fn(x_curr) >= obj_fn(x_prev) && obj_fn(x_curr) - obj_fn(x_prev) < rtol*obj_fn(x_hat)));
 
@@ -43,6 +46,7 @@ stop_fn_L1_L2 = stop_fn(obj_fn_L1_L2);
 stop_fn_L1 = stop_fn(obj_fn_L1);
 stop_fn_MCP = stop_fn(obj_fn_MCP);
 stop_fn_SCAD = stop_fn(obj_fn_SCAD);
+stop_fn_TL1 = stop_fn(obj_fn_TL1);
 
 
 x_L1_L2 = ExtendedProximalDCMethod(A, b, x0, dg_L2, lambda, threshold_iterations, stop_fn_L1_L2);
@@ -65,6 +69,7 @@ x_diff_least_squares = norm(x_least_squares - x_hat, 2)/norm(x_hat, 2);
 x_L1 = ExtendedProximalDCMethod(A, b, x0, dg_0, lambda, threshold_iterations, stop_fn_L1);
 x_MCP = ExtendedProximalDCMethod(A, b, x0, dg_MCP, lambda, threshold_iterations, stop_fn_MCP);
 x_SCAD = ExtendedProximalDCMethod(A, b, x0, dg_SCAD, lambda, threshold_iterations, stop_fn_SCAD);
+x_TL1 = ExtendedProximalDCMethod(A, b, x0, dg_TL1, (a+1)/a, threshold_iterations, stop_fn_TL1);
 
 
 % Truncate all elements below this threshold
@@ -78,6 +83,7 @@ plot(indices, truncate(x_L1_L2, threshold), 'x', 'DisplayName', 'L1 - L2');
 plot(indices, truncate(x_L1, threshold), 'x', 'DisplayName', 'L1');
 plot(indices, truncate(x_MCP, threshold), 'x', 'DisplayName', 'MCP');
 plot(indices, truncate(x_SCAD, threshold), 'x', 'DisplayName', 'SCAD');
+plot(indices, truncate(x_TL1, threshold), 'x', 'DisplayName', 'TL1');
 
 
 
@@ -113,4 +119,12 @@ function [P] = penalty_SCAD(x, lambda, theta)
     end
     
     P = lambda*P;
+end
+
+function [P] = penalty_TL1(x, a)
+    P = 0;
+    
+    for i=1:length(x)
+        P = P + (a+1)*abs(x(i))/(a + abs(x(i)));
+    end
 end
