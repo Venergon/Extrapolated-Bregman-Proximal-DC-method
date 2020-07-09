@@ -1,4 +1,4 @@
-function [x] = calculate_argmin(A, b, w, xi, L, t, x_prev, lambda, max_eigval, thresholding_iterations)
+function [x] = calculate_argmin(A, b, w, xi, L, t, x_prev, lambda, maxthresholding_iterations)
 % Calculates a value x \in argmin_{x} {lambda*|x|_1 + <\nabla f(w_k) - xi_k, x - w_k> +
 % L/2*||x - w_k||_2^2 + 1/t_k*(1/2)*(D(x - x_curr))^2
 % Where f(x) = 1/2 * ||Ax - b||^2
@@ -16,7 +16,7 @@ df = A'*(A*w - b);
 
 n = length(x_prev);
 % TODO: Use 1/[2*max(eigval of A'A)]
-step_size = 1/(2*max_eigval);
+step_size = 1/(max_eigval)^2;
 
 % Gradient of the distance operator D
 USE_KULLBACK_LEIBLER_DIVERGENCE = false;
@@ -36,7 +36,7 @@ for iteration = 1:thresholding_iterations
     inner_vector = x_prev - step_size*dh(x);
 
     for i=1:n
-        x(i) = sign(inner_vector(i))*max((abs(inner_vector(i)) - lambda*step_size), 0);
+        x(i) = sign(inner_vector(i))*(abs(inner_vector(i)) - lambda*step_size);
     end
 end
 

@@ -3,9 +3,9 @@
 USE_2_NORM = true;
 rtol = 1e-5;
 lambda = 10;
-n = 101;
-m = 100;
-density = 0.1;
+n = 1000;
+m = 2000;
+density = 0.01;
 noise_mu = 0;
 noise_sigma = 0.1;
 threshold_iterations = 100;
@@ -40,7 +40,7 @@ obj_fn_MCP = @(x) (norm(A*x-b)^2 + penalty_MCP_closed_form(x, lambda, theta_MCP)
 obj_fn_SCAD = @(x) (norm(A*x-b)^2 + penalty_SCAD_closed_form(x, lambda, theta_SCAD));
 obj_fn_TL1 = @(x) (norm(A*x-b)^2 + penalty_TL1(x, a));
 
-stop_fn = @(obj_fn)  (@(x_prev, x_curr)((obj_fn(x_curr) >= obj_fn(x_prev)) && (obj_fn(x_curr) - obj_fn(x_prev) < rtol*obj_fn(x_hat))));
+stop_fn = @(obj_fn)  (@(x_prev, x_curr)((obj_fn(x_curr) <= obj_fn(x_prev)) && (obj_fn(x_prev) - obj_fn(x_curr) < rtol*obj_fn(x_hat))));
 
 stop_fn_L1_L2 = stop_fn(obj_fn_L1_L2);
 stop_fn_L1 = stop_fn(obj_fn_L1);
@@ -84,7 +84,6 @@ plot(indices, truncate(x_L1, threshold), 'x', 'DisplayName', 'L1');
 plot(indices, truncate(x_MCP, threshold), 'x', 'DisplayName', 'MCP');
 plot(indices, truncate(x_SCAD, threshold), 'x', 'DisplayName', 'SCAD');
 plot(indices, truncate(x_TL1, threshold), 'x', 'DisplayName', 'TL1');
-
 
 
 legend('Location', 'NorthWest');

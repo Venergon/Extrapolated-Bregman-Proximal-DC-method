@@ -28,7 +28,7 @@ else
 end
     
 
-stop_fn = @(x_prev, x_curr)(obj_fn(x_curr) > obj_fn(x_prev) && obj_fn(x_curr) - obj_fn(x_prev) < tol);
+stop_fn = @(x_prev, x_curr)(obj_fn(x_curr) < obj_fn(x_prev) && obj_fn(x_prev) - obj_fn(x_curr) < tol);
 
 
 threshold_iterations = 10;
