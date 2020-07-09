@@ -13,8 +13,6 @@ noise_mu = 0;
 noise_sigma = 0.1;
 threshold_iterations = 100;
 
-rng(0);
-
 A = rand(n, m);
 L = norm(A'*A, 2);
 %lambda = L;
@@ -40,7 +38,7 @@ obj_fn(x_hat)
 disp('Starting Extended Bregman Proximal DC Method');
 tic
 x_bregman = ExtendedProximalDCMethod(A, b, x0, dg, lambda, threshold_iterations, stop_fn);
-toc
+time_bregman = toc
 disp('Finished Extended Bregman Proximal DC Method');
 obj_fn(x0)
 obj_fn(x_bregman)
@@ -52,7 +50,7 @@ cvx_begin
     variable x_cvx(m, 1)
     minimize(sum_square(A*x_cvx-b)+lambda*norm(x_cvx, 1))
 cvx_end
-toc
+time_cvx = toc
 disp('Finished cvx');
 
 obj_x0 = obj_fn(x0);

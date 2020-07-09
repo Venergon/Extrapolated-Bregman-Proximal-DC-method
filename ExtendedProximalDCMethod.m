@@ -44,10 +44,10 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr)))
     
     if (obj_difference < 0) 
         fprintf('Error: obj_difference %e is negative', obj_difference);
-        throw(MException('TEST'));
+        %throw(MException('TEST'));
     end
     
-    if (mod(iteration, 100) == 0)
+    if (mod(iteration, 1000) == 0)
         fprintf('Iteration: %d\n', iteration);
         fprintf('Previous 2 obj values: %e %e\n', obj_fn(x_prev), obj_fn(x_curr));
         fprintf('Diff: %e\n', obj_fn(x_prev) - obj_fn(x_curr));

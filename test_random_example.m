@@ -1,8 +1,8 @@
 % Test ExtendedProximalDCMethod using a randomly generated matrix of size
 % nXm, with some gaussian noise
 USE_2_NORM = true;
-rtol = 1e-5;
-lambda = 10;
+rtol = 1e-4;
+lambda = 100;
 n = 1000;
 m = 2000;
 density = 0.01;
@@ -36,8 +36,8 @@ dg_TL1 = @(x) (sign(x).*((a+1)/(a)) - sign(x).*(a^2 + a)./((a + abs(x)).^2));
 
 obj_fn_L1_L2 = @(x) (norm(A*x-b)^2 + lambda *(norm(x, 1) - norm(x, 2)));
 obj_fn_L1 = @(x) (norm(A*x-b)^2 + lambda * norm(x, 1));
-obj_fn_MCP = @(x) (norm(A*x-b)^2 + penalty_MCP_closed_form(x, lambda, theta_MCP));
-obj_fn_SCAD = @(x) (norm(A*x-b)^2 + penalty_SCAD_closed_form(x, lambda, theta_SCAD));
+obj_fn_MCP = @(x) (norm(A*x-b)^2 + penalty_MCP_paper(x, lambda, theta_MCP));
+obj_fn_SCAD = @(x) (norm(A*x-b)^2 + penalty_SCAD_paper(x, lambda, theta_SCAD));
 obj_fn_TL1 = @(x) (norm(A*x-b)^2 + penalty_TL1(x, a));
 
 stop_fn = @(obj_fn)  (@(x_prev, x_curr)((obj_fn(x_curr) <= obj_fn(x_prev)) && (obj_fn(x_prev) - obj_fn(x_curr) < rtol*obj_fn(x_hat))));
@@ -48,7 +48,7 @@ stop_fn_MCP = stop_fn(obj_fn_MCP);
 stop_fn_SCAD = stop_fn(obj_fn_SCAD);
 stop_fn_TL1 = stop_fn(obj_fn_TL1);
 
-
+disp('Calculating solution to L1-L2 problem');
 x_L1_L2 = ExtendedProximalDCMethod(A, b, x0, dg_L2, lambda, threshold_iterations, stop_fn_L1_L2);
 b_L1_L2 = A*x_L1_L2;
 
@@ -66,9 +66,13 @@ b_diff_least_squares = norm(b_least_squares - b, 2)/norm(b, 2);
 x_diff_L1_L2 = norm(x_L1_L2 - x_hat, 2)/norm(x_hat, 2);
 x_diff_least_squares = norm(x_least_squares - x_hat, 2)/norm(x_hat, 2);
 
+disp('Calculating solution to L1 problem');
 x_L1 = ExtendedProximalDCMethod(A, b, x0, dg_0, lambda, threshold_iterations, stop_fn_L1);
+disp('Calculating solution to MCP problem');
 x_MCP = ExtendedProximalDCMethod(A, b, x0, dg_MCP, lambda, threshold_iterations, stop_fn_MCP);
+disp('Calculating solution to SCAD problem');
 x_SCAD = ExtendedProximalDCMethod(A, b, x0, dg_SCAD, lambda, threshold_iterations, stop_fn_SCAD);
+disp('Calculating solution to TL1 problem');
 x_TL1 = ExtendedProximalDCMethod(A, b, x0, dg_TL1, (a+1)/a, threshold_iterations, stop_fn_TL1);
 
 
@@ -176,5 +180,35 @@ function [P] = penalty_TL1(x, a)
     
     for i=1:length(x)
         P = P + (a+1)*abs(x(i))/(a + abs(x(i)));
+    end
+end
+
+function [P] = penalty_MCP_paper(x, lambda, theta)
+    % Version of the MCP penalty from https://myweb.uiowa.edu/pbreheny/7600/s16/notes/2-29.pdf
+    P = 0;
+
+    for i=1:length(x)
+        x_curr = abs(x(i));
+        if (x_curr <= lambda*theta)
+            P = P + lambda*x_curr - x_curr^2/(2*theta);
+        else
+            P = P + 1/2*theta*lambda^2;
+        end
+    end
+end
+
+function [P] = penalty_SCAD_paper(x, lambda, theta)
+    % Version of the SCAD penalty from https://myweb.uiowa.edu/pbreheny/7600/s16/notes/2-29.pdf
+    P = 0;
+
+    for i=1:length(x)
+        x_curr = abs(x(i));
+        if (x_curr <= lambda)
+            P = P + lambda*x_curr;
+        elseif (x_curr <= lambda*theta)
+            P = P + (2*lambda*theta*x_curr - x_curr^2 - lambda^2)/(2*(theta-1));
+        else
+            P = P + (lambda^2*(theta+1))/2;
+        end
     end
 end
