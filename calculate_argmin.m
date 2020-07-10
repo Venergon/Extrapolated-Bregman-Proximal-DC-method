@@ -15,7 +15,6 @@ function [x] = calculate_argmin(A, b, w, xi, L, t, x_prev, lambda, max_eigval, t
 df = A'*(A*w - b);
 
 n = length(x_prev);
-% TODO: Use 1/[2*max(eigval of A'A)]
 step_size = 1/(2*max_eigval);
 
 % Gradient of the distance operator D
