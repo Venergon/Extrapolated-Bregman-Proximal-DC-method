@@ -89,6 +89,13 @@ plot(indices, truncate(x_MCP, threshold), 'x', 'DisplayName', 'MCP');
 plot(indices, truncate(x_SCAD, threshold), 'x', 'DisplayName', 'SCAD');
 plot(indices, truncate(x_TL1, threshold), 'x', 'DisplayName', 'TL1');
 
+dense_x_hat = nnz(truncate(x_hat, threshold));
+dense_L1_L2 = nnz(truncate(x_L1_L2, threshold));
+dense_L1 = nnz(truncate(x_L1, threshold));
+dense_MCP = nnz(truncate(x_MCP, threshold));
+dense_SCAD = nnz(truncate(x_SCAD, threshold));
+dense_TL1 = nnz(truncate(x_TL1, threshold));
+
 
 legend('Location', 'NorthWest');
 
