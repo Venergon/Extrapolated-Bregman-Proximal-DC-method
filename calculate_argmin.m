@@ -27,7 +27,7 @@ else
     dD = @(x, y) (x - y);
 end
 
-dh = @(x) (lambda*sign(x) + df - xi.*ones(n, 1) + L.*(x-w) + (1/t).*dD(x, x_prev));
+dh = @(x) (df - xi.*ones(n, 1) + L.*(x-w) + (1/t).*dD(x, x_prev));
 
 x = x_prev;
 

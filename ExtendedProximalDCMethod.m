@@ -24,12 +24,12 @@ function [x] = ExtendedProximalDCMethod(A, b, x0, dg_2, lambda, threshold_iterat
 x_curr = x0;
 x_prev = x_curr;
 
-% Calculate L as a lipschitz constant for the gradient of 1/2*|Ax - b|^2
-L = norm(A'*A, 2);
-
-obj_fn = @(x) (norm(A*x-b, 2)^2 + lambda*norm(x, 1));
-
 max_eigval = eigs(A'*A, 1);
+
+% Calculate L as a lipschitz constant for the gradient of 1/2*|Ax - b|^2
+L = max_eigval;
+
+obj_fn = @(x) (1/2*norm(A*x-b, 2)^2 + lambda*norm(x, 1));
 
 
 first_iteration = true;
@@ -40,19 +40,12 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr)))
     iteration = iteration + 1;
     first_iteration = false;
 
-    obj_difference = obj_fn(x_prev) - obj_fn(x_curr);
-    
-    if (obj_difference < 0) 
-        fprintf('Error: obj_difference %e is negative\n', obj_difference);
-        %throw(MException('TEST'));
-    end
-    
     if (mod(iteration, 1000) == 0)
         fprintf('Iteration: %d\n', iteration);
         fprintf('Previous 2 obj values: %e %e\n', obj_fn(x_prev), obj_fn(x_curr));
         fprintf('Diff: %e\n', obj_fn(x_prev) - obj_fn(x_curr));
     end
-    
+
     %% Step 1a: Choose alpha_k >= 0 and compute w_k = x_k + alpha_k*(x_k -
     % x_{k-1})
     
@@ -71,7 +64,7 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr)))
     % L/2*||x - w_k||_2^2 + 1/t_k*D(x, x_k)
     
     % TODO: Currently got a static step size t_k = 1
-    t = 1;
+    t = 10;
     
     x_next = calculate_argmin(A, b, w, xi, L, t, x_curr, lambda, max_eigval, threshold_iterations);
    

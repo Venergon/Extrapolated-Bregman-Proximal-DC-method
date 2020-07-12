@@ -4,7 +4,7 @@
 % Compare to cvx (http://cvxr.com/cvx/), solving the L1 penalty problem in
 % both cases
 USE_2_NORM = true;
-rtol = 1e-4;
+rtol = 1e-8;
 lambda = 100;
 n = 1000;
 m = 2000;
@@ -13,8 +13,9 @@ noise_mu = 0;
 noise_sigma = 0.1;
 threshold_iterations = 100;
 
+rng(0);
+
 A = rand(n, m);
-L = norm(A'*A, 2);
 %lambda = L;
 
 x_hat = sprand(m, 1, density);
@@ -27,10 +28,9 @@ x0 = A \ b;
 
 dg = @(x) (0);
 
-obj_fn = @(x) (norm(A*x-b, 2)^2 + lambda * norm(x, 1));
+obj_fn = @(x) (1/2*norm(A*x-b, 2)^2 + lambda * norm(x, 1));
 
-
-stop_fn = @(x_prev, x_curr)((obj_fn(x_curr) <= obj_fn(x_prev)) && (obj_fn(x_prev) - obj_fn(x_curr) < rtol*obj_fn(x_hat)));
+stop_fn = @(x_prev, x_curr) (stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr));
 
 obj_fn(x0)
 obj_fn(x_hat)
@@ -57,3 +57,18 @@ obj_x0 = obj_fn(x0);
 obj_x_bregman = obj_fn(x_bregman);
 obj_x_cvx = obj_fn(x_cvx);
 obj_x_hat = obj_fn(x_hat);
+
+function [stop] = stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr) 
+    obj_difference = obj_fn(x_prev) - obj_fn(x_curr);
+    
+    stop = 0;
+    
+    if (obj_difference < 0) 
+        fprintf('Error: obj_difference %e is negative\n', obj_difference);
+        %fprintf('Prev x %e, curr x %e diff %e\n', norm(x_prev, 2), norm(x_curr, 2), norm(x_prev - x_curr, 2));
+        %throw(MException('TEST'));
+    elseif (obj_difference < rtol*obj_fn(x_hat))
+        stop = 1;
+    end
+    
+end
