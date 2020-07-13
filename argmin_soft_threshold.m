@@ -1,4 +1,4 @@
-function [x] = calculate_argmin(A, b, w, xi, L, t, x_prev, lambda, max_eigval, thresholding_iterations)
+function [x] = argmin_soft_threshold(A, b, dD, w, xi, L, t, x_prev, lambda, max_eigval, thresholding_iterations)
 % Calculates a value x \in argmin_{x} {lambda*|x|_1 + <\nabla f(w_k) - xi_k, x - w_k> +
 % L/2*||x - w_k||_2^2 + 1/t_k*(1/2)*(D(x - x_curr))^2
 % Where f(x) = 1/2 * ||Ax - b||^2
@@ -16,16 +16,6 @@ df = A'*(A*w - b);
 
 n = length(x_prev);
 step_size = 1/(2*max_eigval);
-
-% Gradient of the distance operator D
-USE_KULLBACK_LEIBLER_DIVERGENCE = false;
-if USE_KULLBACK_LEIBLER_DIVERGENCE
-    % TODO: This breaks if x or y are <= 0, find out what needs to be done
-    % in those cases
-    dD = @(x, y) (log(x./y) + 1);
-else
-    dD = @(x, y) (x - y);
-end
 
 dh = @(x) (df - xi.*ones(n, 1) + L.*(x-w) + (1/t).*dD(x, x_prev));
 

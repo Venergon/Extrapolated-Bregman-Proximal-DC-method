@@ -1,5 +1,5 @@
-USE_2_NORM = true;
-tol = 1e-3;
+USE_2_NORM = false;
+tol = 1e-8;
 lambda = 0.1;
 
 
@@ -28,12 +28,12 @@ else
 end
     
 
-stop_fn = @(x_prev, x_curr)(obj_fn(x_curr) < obj_fn(x_prev) && obj_fn(x_prev) - obj_fn(x_curr) < tol);
+stop_fn = @(x_prev, x_curr, iteration)(obj_fn(x_curr) < obj_fn(x_prev) && obj_fn(x_prev) - obj_fn(x_curr) < tol);
 
 
 threshold_iterations = 10;
-
-x_approx = ExtendedProximalDCMethod(A, b, x0, dg, lambda, threshold_iterations, stop_fn);
+argmin_function = get_argmin_function(lambda, 'L1', 'L2', threshold_iterations);
+x_approx = ExtendedProximalDCMethod(A, b, x0, dg, argmin_function, stop_fn);
 b_approx = A*x_approx;
 
 obj_ideal = obj_fn(x_ideal);

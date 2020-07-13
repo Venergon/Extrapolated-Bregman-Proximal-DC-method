@@ -30,14 +30,15 @@ dg = @(x) (0);
 
 obj_fn = @(x) (1/2*norm(A*x-b, 2)^2 + lambda * norm(x, 1));
 
-stop_fn = @(x_prev, x_curr) (stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr));
+stop_fn = @(x_prev, x_curr, iteration) (stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration));
 
 obj_fn(x0)
 obj_fn(x_hat)
 
 disp('Starting Extended Bregman Proximal DC Method');
 tic
-x_bregman = ExtendedProximalDCMethod(A, b, x0, dg, lambda, threshold_iterations, stop_fn);
+thresh = get_argmin_function(lambda, 'L1', 'L2', threshold_iterations);
+x_bregman = ExtendedProximalDCMethod(A, b, x0, dg, thresh, stop_fn);
 time_bregman = toc
 disp('Finished Extended Bregman Proximal DC Method');
 obj_fn(x0)
@@ -58,10 +59,16 @@ obj_x_bregman = obj_fn(x_bregman);
 obj_x_cvx = obj_fn(x_cvx);
 obj_x_hat = obj_fn(x_hat);
 
-function [stop] = stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr) 
+function [stop] = stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration) 
     obj_difference = obj_fn(x_prev) - obj_fn(x_curr);
     
     stop = 0;
+    
+     if (mod(iteration, 1000) == 0)
+        fprintf('Iteration: %d\n', iteration);
+        fprintf('Previous 2 obj values: %e %e\n', obj_fn(x_prev), obj_fn(x_curr));
+        fprintf('Diff: %e\n', obj_fn(x_prev) - obj_fn(x_curr));
+    end
     
     if (obj_difference < 0) 
         fprintf('Error: obj_difference %e is negative\n', obj_difference);

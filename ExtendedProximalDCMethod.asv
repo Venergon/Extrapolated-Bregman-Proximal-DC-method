@@ -1,4 +1,4 @@
-function [x] = ExtendedProximalDCMethod(A, b, x0, dg_2, calculate_argmin, stop_fn)
+function [x] = ExtendedProximalDCMethod(A, b, x0, dg_2, calculate_argmin, stop_fn, obj_fn)
 % Extended Proximal DC Method: Find an approximation to the minimum of
 % 1/2*|Ax-b|^2 + lambda*(g_1(x) - g_2(x))
 % using the Extended Proximal DC method
@@ -11,7 +11,8 @@ function [x] = ExtendedProximalDCMethod(A, b, x0, dg_2, calculate_argmin, stop_f
 %  calculate_argmin(A, b, w, xi, L, t, x_curr, max_eigval) : the
 %  function used to get argmin{1/2*|Ax-b|^2 + lambda*g_1(x) +
 %  L/2*||x-w^k||_2^2 + 1/t_k*D_h(x, x_k)}
-%  stop_fn(x_prev, x_curr, iteration) : The condition on x_k and x_{k-1} under which to stop
+%  stop_fn(x_prev, x_curr) : The condition on x_k and x_{k-1} under which to stop
+%  obj_fn(x_prev, x_curr)
 % 
 % Outputs:
 %  x : estimate for the minimizer for the above equation
@@ -33,20 +34,16 @@ first_iteration = true;
 % Iterate until the stopping condition is reached, ignoring the first
 % iteration
 iteration = 0;
-while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr, iteration)))
+while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr)))
     iteration = iteration + 1;
     first_iteration = false;
-    
-    if (mod(iteration, 1000) == 0)
-        fprintf('iteration %d\n', iteration);
-    end
-    
+
     %% Step 1a: Choose alpha_k >= 0 and compute w_k = x_k + alpha_k*(x_k -
     % x_{k-1})
     
     % TODO: temporarily choosing alpha_k = 0.5, replace with some way to
     % choose alpha_k
-    alpha = 0;
+    alpha = 1;
     
     w = x_curr + alpha*(x_curr - x_prev);
     
@@ -70,6 +67,10 @@ end
 
 x = x_curr;
 
+
+
 fprintf('Finished in %d iterations\n', iteration);
+fprintf('Previous 2 obj values: %f %f\n', obj_fn(x_prev), obj_fn(x_curr));
+fprintf('Diff: %f\n', obj_fn(x_prev) - obj_fn(x_curr));
 end
 
