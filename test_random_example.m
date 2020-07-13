@@ -8,7 +8,7 @@ m = 2000;
 density = 0.01;
 noise_mu = 0;
 noise_sigma = 0.1;
-threshold_iterations = 100;
+threshold_iterations = 10;
 theta_MCP = 5;
 theta_SCAD = 5;
 a = 1;
@@ -34,11 +34,11 @@ dg_MCP = @(x) (lambda.*sign(x).*min(1, abs(x)/(theta_MCP*lambda)));
 dg_SCAD = @(x) (sign(x).*(min(theta_SCAD*lambda, abs(x)) - lambda)/(theta_SCAD - 1));
 dg_TL1 = @(x) (sign(x).*((a+1)/(a)) - sign(x).*(a^2 + a)./((a + abs(x)).^2));
 
-obj_fn_L1_L2 = @(x) (norm(A*x-b)^2 + lambda *(norm(x, 1) - norm(x, 2)));
-obj_fn_L1 = @(x) (norm(A*x-b)^2 + lambda * norm(x, 1));
-obj_fn_MCP = @(x) (norm(A*x-b)^2 + penalty_MCP_paper(x, lambda, theta_MCP));
-obj_fn_SCAD = @(x) (norm(A*x-b)^2 + penalty_SCAD_paper(x, lambda, theta_SCAD));
-obj_fn_TL1 = @(x) (norm(A*x-b)^2 + penalty_TL1(x, a));
+obj_fn_L1_L2 = @(x) (1/2*norm(A*x-b)^2 + lambda *(norm(x, 1) - norm(x, 2)));
+obj_fn_L1 = @(x) (1/2*norm(A*x-b)^2 + lambda * norm(x, 1));
+obj_fn_MCP = @(x) (1/2*norm(A*x-b)^2 + penalty_MCP_paper(x, lambda, theta_MCP));
+obj_fn_SCAD = @(x) (1/2*norm(A*x-b)^2 + penalty_SCAD_paper(x, lambda, theta_SCAD));
+obj_fn_TL1 = @(x) (1/2*norm(A*x-b)^2 + penalty_TL1(x, a));
 
 stop_fn = @(obj_fn)  (@(x_prev, x_curr)((obj_fn(x_curr) <= obj_fn(x_prev)) && (obj_fn(x_prev) - obj_fn(x_curr) < rtol*obj_fn(x_hat))));
 

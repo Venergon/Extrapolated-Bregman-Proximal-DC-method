@@ -1,17 +1,17 @@
-% Test ExtendedProximalDCMethod using a randomly generated matrix of size
+% Test ExtendedProximalDCMethod using a randomly generated matrix of  size
 % nXm, with some gaussian noise
 
 % Compare to cvx (http://cvxr.com/cvx/), solving the L1 penalty problem in
 % both cases
 USE_2_NORM = true;
-rtol = 1e-8;
+rtol = 1e-6;
 lambda = 100;
 n = 1000;
 m = 2000;
 density = 0.01;
 noise_mu = 0;
 noise_sigma = 0.1;
-threshold_iterations = 100;
+threshold_iterations = 10;
 
 rng(0);
 
@@ -48,7 +48,7 @@ disp('Starting cvx');
 tic
 cvx_begin
     variable x_cvx(m, 1)
-    minimize(sum_square(A*x_cvx-b)+lambda*norm(x_cvx, 1))
+    minimize(1/2*sum_square(A*x_cvx-b)+lambda*norm(x_cvx, 1))
 cvx_end
 time_cvx = toc
 disp('Finished cvx');

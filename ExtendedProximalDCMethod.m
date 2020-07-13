@@ -51,7 +51,7 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr)))
     
     % TODO: temporarily choosing alpha_k = 0.5, replace with some way to
     % choose alpha_k
-    alpha = 0;
+    alpha = 1;
     
     w = x_curr + alpha*(x_curr - x_prev);
     
