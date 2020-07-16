@@ -1,6 +1,6 @@
 % Test ExtendedProximalDCMethod using a randomly generated matrix of size
 % nXm, with some gaussian noise
-rtol = 1e-3;
+rtol = 1e-4;
 lambda = 10;
 n = 1000;
 m = 2000;
@@ -69,7 +69,7 @@ argmin_fn_cauchy_lambda = get_argmin_function(lambda, 'cauchy', 'L2', threshold_
 argmin_fn_arctan_lambda = get_argmin_function(lambda, 'arctan', 'L2', threshold_iterations);
 
 disp('Calculating solution to arctan problem');
-x_arctan = ExtendedProximalDCMethod(A, b, x0, dg_arctan, argmin_fn_arctan_lambda, stop_fn_arctan);
+x_arctan = x0;%ExtendedProximalDCMethod(A, b, x0, dg_arctan, argmin_fn_arctan_lambda, stop_fn_arctan);
 
 disp('Calculating solution to cauchy priory problem');
 x_cauchy = ExtendedProximalDCMethod(A, b, x0, dg_cauchy, argmin_fn_cauchy_lambda, stop_fn_cauchy);
