@@ -36,7 +36,7 @@ c = c + gamma/(2*t);
 d = d - gamma*x_prev/(2*t);
 
 for i=1:n
-    x(i) = solve_cubic(a(i), b(i), c(i), d(i));
+    x(i) = solve_cubic(a(i), b(i), c(i), d(i), @(x) 1);
 end
 
 end

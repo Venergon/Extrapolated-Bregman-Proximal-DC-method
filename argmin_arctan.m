@@ -60,8 +60,8 @@ d_pos = d_pos - (beta.^2+1)./t;
 d_neg = d_neg - (beta.^2+1)./t;
 
 for i=1:n
-    pos = solve_cubic(a_pos(i), b_pos(i), c_pos(i), d_pos(i));
-    neg = solve_cubic(a_neg(i), b_neg(i), c_neg(i), d_neg(i));
+    pos = solve_cubic(a_pos(i), b_pos(i), c_pos(i), d_pos(i), @(x) x >= 0);
+    neg = solve_cubic(a_neg(i), b_neg(i), c_neg(i), d_neg(i), @(x) x <= 0);
     
     % Exactly one of the functions should have a solution within the
     % correct domain

@@ -60,7 +60,7 @@ stop_fn_MCP = stop_fn(obj_fn_MCP);
 stop_fn_SCAD = stop_fn(obj_fn_SCAD);
 stop_fn_TL1 = stop_fn(obj_fn_TL1);
 stop_fn_cauchy = stop_fn(obj_fn_cauchy);
-stop_fn_arctab = stop_fn(obj_fn_arctan);
+stop_fn_arctan = stop_fn(obj_fn_arctan);
 
 
 argmin_fn_soft_lambda = get_argmin_function(lambda, 'L1', 'L2', threshold_iterations);
@@ -68,11 +68,11 @@ argmin_fn_soft_TL1 = get_argmin_function((a+1)/a, 'L1', 'L2', threshold_iteratio
 argmin_fn_cauchy_lambda = get_argmin_function(lambda, 'cauchy', 'L2', threshold_iterations);
 argmin_fn_arctan_lambda = get_argmin_function(lambda, 'arctan', 'L2', threshold_iterations);
 
-disp('Calculating solution to cauchy priory problem');
-x_cauchy = ExtendedProximalDCMethod(A, b, x0, dg_cauchy, argmin_fn_cauchy_lambda, stop_fn_cauchy);
-
 disp('Calculating solution to arctan problem');
 x_arctan = ExtendedProximalDCMethod(A, b, x0, dg_arctan, argmin_fn_arctan_lambda, stop_fn_arctan);
+
+disp('Calculating solution to cauchy priory problem');
+x_cauchy = ExtendedProximalDCMethod(A, b, x0, dg_cauchy, argmin_fn_cauchy_lambda, stop_fn_cauchy);
 
 disp('Calculating solution to L1-L2 problem');
 x_L1_L2 = ExtendedProximalDCMethod(A, b, x0, dg_L2, argmin_fn_soft_lambda, stop_fn_L1_L2);
