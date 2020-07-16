@@ -1,6 +1,6 @@
 % Test ExtendedProximalDCMethod using a randomly generated matrix of size
 % nXm, with some gaussian noise
-rtol = 1e-4;
+rtol = 1e-3;
 lambda = 10;
 n = 1000;
 m = 2000;
@@ -11,7 +11,14 @@ threshold_iterations = 10;
 theta_MCP = 5;
 theta_SCAD = 5;
 a = 1;
-gamma_cauchy = 1;
+gamma_cauchy = 2;
+
+beta_arctan = sqrt(3)/3;
+gamma_arctan = pi/6;
+alpha_arctan = 1;
+
+M_arctan = (3*alpha_arctan^2*beta_arctan^(2/3))/(4*gamma_arctan);
+
 
 A = rand(n, m);
 
@@ -35,6 +42,7 @@ dg_SCAD = @(x) (sign(x).*(min(theta_SCAD*lambda, abs(x)) - lambda)/(theta_SCAD -
 dg_TL1 = @(x) (sign(x).*((a+1)/(a)) - sign(x).*(a^2 + a)./((a + abs(x)).^2));
 
 dg_cauchy = @(x) lambda*2*x;
+dg_arctan = @(x) lambda*M_arctan*x;
 
 obj_fn_L1_L2 = @(x) (1/2*norm(A*x-b)^2 + lambda *(norm(x, 1) - norm(x, 2)));
 obj_fn_L1 = @(x) (1/2*norm(A*x-b)^2 + lambda * norm(x, 1));
@@ -42,6 +50,7 @@ obj_fn_MCP = @(x) (1/2*norm(A*x-b)^2 + penalty_MCP_paper(x, lambda, theta_MCP));
 obj_fn_SCAD = @(x) (1/2*norm(A*x-b)^2 + penalty_SCAD_paper(x, lambda, theta_SCAD));
 obj_fn_TL1 = @(x) (1/2*norm(A*x-b)^2 + penalty_TL1(x, a));
 obj_fn_cauchy = @(x) (1/2*norm(A*x-b)^2 + penalty_cauchy(x, lambda, gamma_cauchy));
+obj_fn_arctan = @(x) (1/2*norm(A*x-b)^2 + penalty_arctan(x, lambda, alpha_arctan, beta_arctan, gamma_arctan));
 
 stop_fn = @(obj_fn)  (@(x_prev, x_curr, iteration)(stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration)));
 
@@ -51,13 +60,19 @@ stop_fn_MCP = stop_fn(obj_fn_MCP);
 stop_fn_SCAD = stop_fn(obj_fn_SCAD);
 stop_fn_TL1 = stop_fn(obj_fn_TL1);
 stop_fn_cauchy = stop_fn(obj_fn_cauchy);
+stop_fn_arctab = stop_fn(obj_fn_arctan);
+
 
 argmin_fn_soft_lambda = get_argmin_function(lambda, 'L1', 'L2', threshold_iterations);
 argmin_fn_soft_TL1 = get_argmin_function((a+1)/a, 'L1', 'L2', threshold_iterations);
 argmin_fn_cauchy_lambda = get_argmin_function(lambda, 'cauchy', 'L2', threshold_iterations);
+argmin_fn_arctan_lambda = get_argmin_function(lambda, 'arctan', 'L2', threshold_iterations);
 
 disp('Calculating solution to cauchy priory problem');
 x_cauchy = ExtendedProximalDCMethod(A, b, x0, dg_cauchy, argmin_fn_cauchy_lambda, stop_fn_cauchy);
+
+disp('Calculating solution to arctan problem');
+x_arctan = ExtendedProximalDCMethod(A, b, x0, dg_arctan, argmin_fn_arctan_lambda, stop_fn_arctan);
 
 disp('Calculating solution to L1-L2 problem');
 x_L1_L2 = ExtendedProximalDCMethod(A, b, x0, dg_L2, argmin_fn_soft_lambda, stop_fn_L1_L2);
@@ -101,6 +116,7 @@ plot(indices, truncate(x_MCP, threshold), 'x', 'DisplayName', 'MCP');
 plot(indices, truncate(x_SCAD, threshold), 'x', 'DisplayName', 'SCAD');
 plot(indices, truncate(x_TL1, threshold), 'x', 'DisplayName', 'TL1');
 plot(indices, truncate(x_cauchy, threshold), 'x', 'DisplayName', 'Cauchy priory');
+plot(indices, truncate(x_arctan, threshold), 'x', 'DisplayName', 'Arctan');
 
 
 dense_x_hat = nnz(truncate(x_hat, threshold));
@@ -110,6 +126,7 @@ dense_MCP = nnz(truncate(x_MCP, threshold));
 dense_SCAD = nnz(truncate(x_SCAD, threshold));
 dense_TL1 = nnz(truncate(x_TL1, threshold));
 dense_cauchy = nnz(truncate(x_cauchy, threshold));
+dense_arctan = nnz(truncate(x_arctan, threshold));
 
 
 legend('Location', 'NorthWest');
@@ -239,8 +256,18 @@ function [P] = penalty_cauchy(x, lambda, gamma)
     P = 0;
     
     for i=1:length(x)
-        P = P - log(gamma/(x(i)^2 + gamma));
+        P = P - lambda*log(gamma/(x(i)^2 + gamma));
     end
+end
+
+function [P] = penalty_arctan(x, lambda, alpha, beta, gamma)
+    P = 0;
+    
+    for i=1:length(x)
+        P = P + atan((1+alpha*abs(x(i)))) - atan(1/beta);
+    end
+    
+    P = lambda/gamma * P;
 end
 
 function [stop] = stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration) 

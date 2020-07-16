@@ -40,6 +40,11 @@ switch penalty_type
     case 'cauchy'
         gamma = 2;
         f = @(A, b, w, xi, L, t, x_prev, max_eigval) argmin_cauchy(A, b, dD, w, xi, L, t, x_prev, lambda, max_eigval, iterations, gamma);
+    case 'arctan'
+        beta = sqrt(3)/3;
+        gamma = pi/6;
+        alpha = 1;
+        f = @(A, b, w, xi, L, t, x_prev, max_eigval) argmin_arctan(A, b, dD, w, xi, L, t, x_prev, lambda, max_eigval, iterations, alpha, beta, gamma);
     otherwise
         disp('Please select a valid penalty type from the following: ["L1", "cauchy"]')
 
