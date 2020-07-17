@@ -46,7 +46,7 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr, itera
     
     % TODO: temporarily choosing alpha_k = 0.5, replace with some way to
     % choose alpha_k
-    alpha = 0;
+    alpha = 0.5;
     
     w = x_curr + alpha*(x_curr - x_prev);
     
@@ -59,7 +59,7 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr, itera
     % L/2*||x - w_k||_2^2 + 1/t_k*D(x, x_k)
     
     % TODO: Currently got a static step size t_k = 1
-    t = 10;
+    t = 100;
     
     x_next = calculate_argmin(A, b, w, xi, L, t, x_curr, max_eigval);
    

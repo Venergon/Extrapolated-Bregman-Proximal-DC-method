@@ -1,5 +1,5 @@
 USE_2_NORM = false;
-tol = 1e-8;
+tol = 1e-10;
 lambda = 0.1;
 
 

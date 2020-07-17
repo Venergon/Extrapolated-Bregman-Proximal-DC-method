@@ -35,7 +35,10 @@ b = b - x_prev/(2*t);
 c = c + gamma/(2*t);
 d = d - gamma*x_prev/(2*t);
 
-x = fast_solve_cubic(a, b, c, d);
+%x = fast_solve_cubic(a, b, c, d);
 
+for i=1:length(x)
+    x(i) = slow_solve_cubic(a(i), b(i), c(i), d(i), @(x) 1);
+end
 end
 

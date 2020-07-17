@@ -1,6 +1,6 @@
 % Test ExtendedProximalDCMethod using a randomly generated matrix of size
 % nXm, with some gaussian noise
-rtol = 1e-4;
+rtol = 0.75e-3;
 lambda = 10;
 n = 1000;
 m = 2000;
@@ -95,11 +95,11 @@ x_diff_least_squares = norm(x_least_squares - x_hat, 2)/norm(x_hat, 2);
 disp('Calculating solution to L1 problem');
 x_L1 = ExtendedProximalDCMethod(A, b, x0, dg_0, argmin_fn_soft_lambda, stop_fn_L1);
 disp('Calculating solution to MCP problem');
-x_MCP = ExtendedProximalDCMethod(A, b, x0, dg_MCP, argmin_fn_soft_lambda, stop_fn_MCP);
+%x_MCP = ExtendedProximalDCMethod(A, b, x0, dg_MCP, argmin_fn_soft_lambda, stop_fn_MCP);
 disp('Calculating solution to SCAD problem');
-x_SCAD = ExtendedProximalDCMethod(A, b, x0, dg_SCAD, argmin_fn_soft_lambda, stop_fn_SCAD);
+%x_SCAD = ExtendedProximalDCMethod(A, b, x0, dg_SCAD, argmin_fn_soft_lambda, stop_fn_SCAD);
 disp('Calculating solution to TL1 problem');
-x_TL1 = ExtendedProximalDCMethod(A, b, x0, dg_TL1, argmin_fn_soft_TL1, stop_fn_TL1);
+%x_TL1 = ExtendedProximalDCMethod(A, b, x0, dg_TL1, argmin_fn_soft_TL1, stop_fn_TL1);
 
 
 
@@ -112,24 +112,24 @@ indices = 1:m;
 hold on;
 plot(indices, truncate(x_L1_L2, threshold), 'x', 'DisplayName', 'L1 - L2');
 plot(indices, truncate(x_L1, threshold), 'x', 'DisplayName', 'L1');
-plot(indices, truncate(x_MCP, threshold), 'x', 'DisplayName', 'MCP');
-plot(indices, truncate(x_SCAD, threshold), 'x', 'DisplayName', 'SCAD');
-plot(indices, truncate(x_TL1, threshold), 'x', 'DisplayName', 'TL1');
+%plot(indices, truncate(x_MCP, threshold), 'x', 'DisplayName', 'MCP');
+%plot(indices, truncate(x_SCAD, threshold), 'x', 'DisplayName', 'SCAD');
+%plot(indices, truncate(x_TL1, threshold), 'x', 'DisplayName', 'TL1');
 plot(indices, truncate(x_cauchy, threshold), 'x', 'DisplayName', 'Cauchy priory');
-plot(indices, truncate(x_arctan, threshold), 'x', 'DisplayName', 'Arctan');
+%plot(indices, truncate(x_arctan, threshold), 'x', 'DisplayName', 'Arctan');
 
+legend('Location', 'NorthWest');
 
 dense_x_hat = nnz(truncate(x_hat, threshold));
 dense_L1_L2 = nnz(truncate(x_L1_L2, threshold));
 dense_L1 = nnz(truncate(x_L1, threshold));
-dense_MCP = nnz(truncate(x_MCP, threshold));
-dense_SCAD = nnz(truncate(x_SCAD, threshold));
-dense_TL1 = nnz(truncate(x_TL1, threshold));
+%dense_MCP = nnz(truncate(x_MCP, threshold));
+%dense_SCAD = nnz(truncate(x_SCAD, threshold));
+%dense_TL1 = nnz(truncate(x_TL1, threshold));
 dense_cauchy = nnz(truncate(x_cauchy, threshold));
-dense_arctan = nnz(truncate(x_arctan, threshold));
+%dense_arctan = nnz(truncate(x_arctan, threshold));
 
 
-legend('Location', 'NorthWest');
 
 hold off;
 

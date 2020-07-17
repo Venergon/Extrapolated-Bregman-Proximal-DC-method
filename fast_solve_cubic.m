@@ -12,6 +12,9 @@ function [x] = fast_solve_cubic(a, b, c, d)
 % Output:
 %  x: one of the real roots of the equation
 
+% NOTE: Might not necessarily work, will need to check general cubic
+% formula to see if just taking C with no xi will always yield a real root
+
 % Uses the 'General Cubic Formula' from https://en.wikipedia.org/wiki/Cubic_equation
 delta_0 = b.^2 - 3.*a.*c;
 delta_1 = 2.*b.^3 - 9.*a.*b.*c + 27.*a.^2.*d;
@@ -20,7 +23,7 @@ delta_1 = 2.*b.^3 - 9.*a.*b.*c + 27.*a.^2.*d;
 % need to pick the other one
 % Choosing based on the sign of delta_1 ensures that it will never result
 % in 0
-C = ((delta_1 + sign(delta_1).*sqrt(delta_1.^2 - 4.*delta_0.^3))./2).^(1/3);
+C = ((delta_1 + sqrt(delta_1.^2 - 4.*delta_0.^3))./2).^(1/3);
 
 %if (C == 0)
 %    C = ((delta_1 - sqrt(delta_1.^2 - 4.*delta_0.^3))./2).^(1/3);
