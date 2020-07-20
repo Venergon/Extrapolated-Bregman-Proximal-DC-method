@@ -1,5 +1,7 @@
 % Test ExtendedProximalDCMethod using a randomly generated matrix of size
 % nXm, with some gaussian noise
+rng(0);
+
 rtol = 1e-4;
 lambda = 10;
 n = 1000;
@@ -48,7 +50,7 @@ obj_fn_L1_L2 = @(x) (1/2*norm(A*x-b)^2 + lambda *(norm(x, 1) - norm(x, 2)));
 obj_fn_L1 = @(x) (1/2*norm(A*x-b)^2 + lambda * norm(x, 1));
 obj_fn_MCP = @(x) (1/2*norm(A*x-b)^2 + penalty_MCP(x, lambda, theta_MCP));
 obj_fn_SCAD = @(x) (1/2*norm(A*x-b)^2 + penalty_SCAD(x, lambda, theta_SCAD));
-obj_fn_TL1 = @(x) (1/2*norm(A*x-b)^2 + penalty_TL1(x, a));
+obj_fn_TL1 = @(x) (1/2*norm(A*x-b)^2 + penalty_TL1(x, lambda, a));
 obj_fn_cauchy = @(x) (1/2*norm(A*x-b)^2 + penalty_cauchy(x, lambda, gamma_cauchy));
 obj_fn_arctan = @(x) (1/2*norm(A*x-b)^2 + penalty_arctan(x, lambda, alpha_arctan, beta_arctan, gamma_arctan));
 
@@ -130,7 +132,7 @@ plot(indices, truncate(x_L1_L2, threshold), 'x', 'DisplayName', 'L1 - L2');
 plot(indices, truncate(x_L1, threshold), 'x', 'DisplayName', 'L1');
 plot(indices, truncate(x_MCP, threshold), 'x', 'DisplayName', 'MCP');
 plot(indices, truncate(x_SCAD, threshold), 'x', 'DisplayName', 'SCAD');
-plot(indices, truncate(x_TL1, threshold), 'x', 'DisplayName', 'TL1');
+%plot(indices, truncate(x_TL1, threshold), 'x', 'DisplayName', 'TL1');
 plot(indices, truncate(x_cauchy, threshold), 'x', 'DisplayName', 'Cauchy priory');
 %plot(indices, truncate(x_arctan, threshold), 'x', 'DisplayName', 'Arctan');
 
@@ -141,7 +143,7 @@ dense_L1_L2 = nnz(truncate(x_L1_L2, threshold));
 dense_L1 = nnz(truncate(x_L1, threshold));
 dense_MCP = nnz(truncate(x_MCP, threshold));
 dense_SCAD = nnz(truncate(x_SCAD, threshold));
-dense_TL1 = nnz(truncate(x_TL1, threshold));
+%dense_TL1 = nnz(truncate(x_TL1, threshold));
 dense_cauchy = nnz(truncate(x_cauchy, threshold));
 %dense_arctan = nnz(truncate(x_arctan, threshold));
 
