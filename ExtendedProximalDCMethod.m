@@ -29,6 +29,13 @@ max_eigval = eigs(A'*A, 1);
 % Calculate L as a lipschitz constant for the gradient of 1/2*|Ax - b|^2
 L = max_eigval;
 
+% Set the parameters for the extapolation parameter, based on the method to pick kappa in 
+% remark 3.2 in https://arxiv.org/pdf/2003.04124.pdf
+% Choose alpha_max as close as possible to 1 without reaching 1
+alpha_max = 0.99;
+nu_curr = 1;
+n0 = 100;
+
 first_iteration = true;
 % Iterate until the stopping condition is reached, ignoring the first
 % iteration
@@ -43,10 +50,17 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr, itera
     
     %% Step 1a: Choose alpha_k >= 0 and compute w_k = x_k + alpha_k*(x_k -
     % x_{k-1})
+    if (mod(iteration, n0) == 0)
+        % Reset nu every n0 iterations
+        nu_prev = 1;
+        nu_curr = 1;
+    else
+        nu_prev = nu_curr;
+        nu_curr = (1 + sqrt(1 + 4*nu_prev^2))/2;
+    end
     
-    % TODO: temporarily choosing alpha_k = 0.5, replace with some way to
-    % choose alpha_k
-    alpha = 0.5;
+    alpha = alpha_max * (nu_prev - 1)/nu_curr;
+    
     
     w = x_curr + alpha*(x_curr - x_prev);
     
