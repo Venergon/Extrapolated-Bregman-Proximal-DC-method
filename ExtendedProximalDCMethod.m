@@ -35,6 +35,7 @@ L = max_eigval;
 alpha_max = 0.99;
 nu_curr = 1;
 n0 = 100;
+max_diff = 0;
 
 first_iteration = true;
 % Iterate until the stopping condition is reached, ignoring the first
@@ -59,10 +60,13 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr, itera
         nu_curr = (1 + sqrt(1 + 4*nu_prev^2))/2;
     end
     
-    alpha = alpha_max * (nu_prev - 1)/nu_curr;
-    
-    
-    w = x_curr + alpha*(x_curr - x_prev);
+    %alpha = alpha_max * (nu_prev - 1)/nu_curr;
+    if (iteration == 1)
+        alpha = 0;
+    else
+        alpha = (norm(x_prev - x_curr)/max_diff)*alpha_max;
+    end
+    w = x_curr + alpha.*(x_curr - x_prev);
     
     %% Step 1b: Compute xi_k \in \partial{lambda * g}(x_k)
     % lambda already comes from dg_2
@@ -80,6 +84,11 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr, itera
     %% Shuffle x_prev, x_curr, x_next to represent moving to the next value of k
     x_prev = x_curr;
     x_curr = x_next;
+    
+    diff = norm(x_prev - x_curr);
+    if diff > max_diff
+        max_diff = diff;
+    end
 end
 
 x = x_curr;
