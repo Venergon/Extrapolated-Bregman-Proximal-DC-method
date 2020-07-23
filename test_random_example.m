@@ -34,6 +34,8 @@ x0 = A \ b;
 % g = ||x||_2, so dg = 
 
 dg_L2 = @(x) lambda*dg_2_norm(x);
+dg_half_L2 = @(x) lambda*dg_2_norm(x)/2;
+dg_double_L2 = @(x) lambda*dg_2_norm(x)*2;
 dg_0 = @(x) (0);
 
 % DC decompositions of MCP, SCAD and Transformed L1 come from 
@@ -47,6 +49,9 @@ dg_cauchy = @(x) lambda*2*x;
 dg_arctan = @(x) lambda*M_arctan*x;
 
 obj_fn_L1_L2 = @(x) (1/2*norm(A*x-b)^2 + lambda *(norm(x, 1) - norm(x, 2)));
+obj_fn_L1_half_L2 = @(x) (1/2*norm(A*x-b)^2 + lambda *(norm(x, 1) - (1/2)*norm(x, 2)));
+obj_fn_L1_double_L2 = @(x) (1/2*norm(A*x-b)^2 + lambda *(norm(x, 1) - 2*norm(x, 2)));
+
 obj_fn_L1 = @(x) (1/2*norm(A*x-b)^2 + lambda * norm(x, 1));
 obj_fn_MCP = @(x) (1/2*norm(A*x-b)^2 + penalty_MCP(x, lambda, theta_MCP));
 obj_fn_SCAD = @(x) (1/2*norm(A*x-b)^2 + penalty_SCAD(x, lambda, theta_SCAD));
@@ -57,6 +62,9 @@ obj_fn_arctan = @(x) (1/2*norm(A*x-b)^2 + penalty_arctan(x, lambda, alpha_arctan
 stop_fn = @(obj_fn)  (@(x_prev, x_curr, iteration)(stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration)));
 
 stop_fn_L1_L2 = stop_fn(obj_fn_L1_L2);
+stop_fn_L1_half_L2 = stop_fn(obj_fn_L1_half_L2);
+stop_fn_L1_double_L2 = stop_fn(obj_fn_L1_double_L2);
+
 stop_fn_L1 = stop_fn(obj_fn_L1);
 stop_fn_MCP = stop_fn(obj_fn_MCP);
 stop_fn_SCAD = stop_fn(obj_fn_SCAD);
@@ -120,6 +128,16 @@ disp('Calculating solution to TL1 problem');
 x_TL1 = ExtendedProximalDCMethod(A, b, x0, dg_TL1, argmin_fn_soft_TL1, stop_fn_TL1);
 t_TL1 = toc
 
+tic
+disp('Calculating solution to L1-1/2*L2 problem');
+x_L1_half_L2 = ExtendedProximalDCMethod(A, b, x0, dg_half_L2, argmin_fn_soft_lambda, stop_fn_L1_half_L2);
+t_L1_half_L2 = toc
+
+tic
+disp('Calculating solution to L1-2*L2 problem');
+x_L1_double_L2 = ExtendedProximalDCMethod(A, b, x0, dg_half_L2, argmin_fn_soft_lambda, stop_fn_L1_double_L2);
+t_L1_double_L2 = toc
+
 
 % Truncate all elements below this threshold
 threshold = 0.1;
@@ -132,9 +150,12 @@ plot(indices, truncate(x_L1_L2, threshold), 'x', 'DisplayName', 'L1 - L2');
 plot(indices, truncate(x_L1, threshold), 'x', 'DisplayName', 'L1');
 plot(indices, truncate(x_MCP, threshold), 'x', 'DisplayName', 'MCP');
 plot(indices, truncate(x_SCAD, threshold), 'x', 'DisplayName', 'SCAD');
-%plot(indices, truncate(x_TL1, threshold), 'x', 'DisplayName', 'TL1');
+plot(indices, truncate(x_TL1, threshold), 'x', 'DisplayName', 'TL1');
 plot(indices, truncate(x_cauchy, threshold), 'x', 'DisplayName', 'Cauchy priory');
 %plot(indices, truncate(x_arctan, threshold), 'x', 'DisplayName', 'Arctan');
+plot(indices, truncate(x_L1_half_L2, threshold), 'x', 'DisplayName', 'L1-1/2*L2');
+plot(indices, truncate(x_L1_double_L2, threshold), 'x', 'DisplayName', 'L1-2*L2');
+
 
 legend('Location', 'NorthWest');
 
@@ -143,9 +164,11 @@ dense_L1_L2 = nnz(truncate(x_L1_L2, threshold));
 dense_L1 = nnz(truncate(x_L1, threshold));
 dense_MCP = nnz(truncate(x_MCP, threshold));
 dense_SCAD = nnz(truncate(x_SCAD, threshold));
-%dense_TL1 = nnz(truncate(x_TL1, threshold));
+dense_TL1 = nnz(truncate(x_TL1, threshold));
 dense_cauchy = nnz(truncate(x_cauchy, threshold));
 %dense_arctan = nnz(truncate(x_arctan, threshold));
+dense_L1_half_L2 = nnz(truncate(x_L1_half_L2, threshold));
+dense_L1_double_L2 = nnz(truncate(x_L1_double_L2, threshold));
 
 hold off;
 
