@@ -72,7 +72,7 @@ argmin_fn_arctan_lambda = get_argmin_function(lambda, 'arctan', 'L2', threshold_
 
 tic
 disp('Calculating solution to arctan problem');
-x_arctan = x0;%ExtendedProximalDCMethod(A, b, x0, dg_arctan, argmin_fn_arctan_lambda, stop_fn_arctan);
+%x_arctan = ExtendedProximalDCMethod(A, b, x0, dg_arctan, argmin_fn_arctan_lambda, stop_fn_arctan);
 t_arctan = toc
 
 tic

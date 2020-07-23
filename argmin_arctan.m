@@ -31,55 +31,57 @@ x = x_prev;
 
 % Formulate it as ax^3 + bx^2 + cx + d
 % Start with everything but the parts relying on D
-a = alpha.^2.*(M+L).*ones(size(x_prev));
+a = (lambda*M + L).*ones(size(x_prev));
 a_pos = a;
 a_neg = a;
 
-b_pos = ones(size(x_prev)).*(alpha.^2.*(df-xi-L.*w) + 2.*alpha.*(lambda.*M+L));
-b_neg = ones(size(x_prev)).*(alpha.^2.*(df-xi-L.*w) - 2.*alpha.*(lambda.*M+L));
+b_pos = ones(size(x_prev)).*(6*lambda*M + df - xi + 6*alpha*L - w*L);
+b_neg = ones(size(x_prev)).*(-6*lambda*M + df - xi - 6*alpha*L - w*L);
 
-c_pos = ones(size(x_prev)).*(2.*alpha.*(df-xi-L.*w) + (beta^2+1).*(lambda.*M+L));
-c_neg = -c_pos;
+c_pos = ones(size(x_prev)).*(4*lambda*M + 6*alpha*df - 6*alpha*xi + 4*L - 6*alpha*w*L);
+c_neg = ones(size(x_prev)).*(4*lambda*M - 6*alpha*df + 6*alpha*xi + 4*L + 6*alpha*w*L);
 
-d_pos = ones(size(x_prev)).*(lambda.*alpha.*beta./gamma + (beta.^2+1).*(df-xi-L.*w));
-d_neg = ones(size(x_prev)).*(-lambda.*alpha.*beta./gamma + (beta.^2+1).*(df-xi-L.*w));
+d_pos = ones(size(x_prev)).*(6*sqrt(3)*lambda*alpha/pi + 4*df - 4*xi - 4*L*w);
+d_neg = ones(size(x_prev)).*(-6*sqrt(3)*lambda*alpha/pi + 4*df - 4*xi - 4*L*w);
 
 % Add the terms based on D
 % TODO: Currently assume using 1/2*||x-x_prev||_2^2
 % For which d/dx = (x-x_prev)
-a_pos = a_pos + alpha.^2./t;
-a_neg = a_neg + alpha.^2./t;
+a_pos = a_pos + 1./t;
+a_neg = a_neg + 1./t;
 
-b_pos = b_pos + (2.*alpha-alpha.^2.*x_prev)./t;
-b_neg = b_neg + (-2.*alpha-alpha.^2.*x_prev)./t;
+b_pos = b_pos + (6.*alpha-x_prev)./t;
+b_neg = b_neg + (-6.*alpha-x_prev)./t;
 
-c_pos = c_pos + (beta.^2+1 - 2.*alpha.*x_prev)./t;
-c_neg = c_neg + (beta.^2+1 + 2.*alpha.*x_prev)./t;
+c_pos = c_pos + (4-6.*alpha.*x_prev)./t;
+c_neg = c_neg + (4+6.*alpha.*x_prev)./t;
 
-d_pos = d_pos - (beta.^2+1)./t;
-d_neg = d_neg - (beta.^2+1)./t;
+d_pos = d_pos + (-4.*x_prev)./t;
+d_neg = d_neg + (-4.*x_prev)./t;
 
 for i=1:n
-    pos = slow_solve_cubic(a_pos(i), b_pos(i), c_pos(i), d_pos(i), @(x) x >= 0);
-    neg = slow_solve_cubic(a_neg(i), b_neg(i), c_neg(i), d_neg(i), @(x) x <= 0);
+    pos = trig_solve_cubic(a_pos(i), b_pos(i), c_pos(i), d_pos(i), @(x) 1);
+    neg = trig_solve_cubic(a_neg(i), b_neg(i), c_neg(i), d_neg(i), @(x) 1);
     
-    % Exactly one of the functions should have a solution within the
-    % correct domain
-    if (pos > 0) && (neg < 0)
-        % Both functions have zero in the correct domain
-        fprintf('Warning, got two zeros in correct domain %f %f\n', pos, neg);
-        x(i) = pos;
-    elseif (pos < 0) && (neg > 0)
-        % Both functions have zero in wrong domain
-        fprintf('Warning, got two zeros in incorrect domain %f %f\n', pos, neg);
-        x(i) = pos;
-    elseif (pos > 0) % neg >= 0
-        x(i) = pos;
-    elseif (neg < 0) % pos <= 0
-        x(i) = neg;
-    else % pos = 0, neg = 0
-        x(i) = 0;
+    % Can have zeros at any of these points
+    possible_minima = [pos, neg, 0];
+    
+    min_value = Inf;
+    min_point = 0;
+    for j=1:length(possible_minima)
+        curr_point = possible_minima(j);
+        curr_value = penalty_arctan(curr_point, lambda, alpha, beta, gamma) + lambda*M/2*curr_point^2 + (df(i)-xi(i))*(curr_point-w(i)) + L/2*(curr_point - w(i))^2 + 1/(2*t)*(curr_point-x_prev(i))^2;
+
+        if curr_value < min_value
+            min_value = curr_value;
+            min_point = curr_point;
+        end
     end
+    %possible_minima
+    %min_point
+    %x_prev(i)
+
+    x(i) = min_point;
 end
 
 end

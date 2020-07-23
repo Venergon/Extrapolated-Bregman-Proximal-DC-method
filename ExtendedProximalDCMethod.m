@@ -60,12 +60,9 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr, itera
         nu_curr = (1 + sqrt(1 + 4*nu_prev^2))/2;
     end
     
-    %alpha = alpha_max * (nu_prev - 1)/nu_curr;
-    if (iteration == 1)
-        alpha = 0;
-    else
-        alpha = (norm(x_prev - x_curr)/max_diff)*alpha_max;
-    end
+    alpha = alpha_max * (nu_prev - 1)/nu_curr;
+    alpha=0;
+    
     w = x_curr + alpha.*(x_curr - x_prev);
     
     %% Step 1b: Compute xi_k \in \partial{lambda * g}(x_k)

@@ -10,7 +10,7 @@ function [stop] = stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration)
      end
     
     if (obj_difference < 0) 
-        fprintf('Error: obj_difference %e is negative\n', obj_difference);
+        fprintf('Error: iteration: %d obj_difference %e is negative\n', iteration, obj_difference);
         %fprintf('Prev x %e, curr x %e diff %e\n', norm(x_prev, 2), norm(x_curr, 2), norm(x_prev - x_curr, 2));
         %throw(MException('TEST'));
     elseif (obj_difference < rtol*obj_fn(x_hat))
