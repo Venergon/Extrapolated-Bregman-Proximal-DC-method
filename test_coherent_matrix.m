@@ -150,13 +150,13 @@ threshold = 0.1;
 
 % Plot the values of each version of x to see how close they are
 indices = 1:m;
-%plot(indices, truncate(x_hat, threshold), 'x', 'DisplayName', 'Original x');
+plot(indices, truncate(x_hat, threshold), 'o', 'DisplayName', 'Original x');
 hold on;
 plot(indices, x_L1_L2, 'x', 'DisplayName', 'L1 - L2');
 plot(indices, x_L1, 'x', 'DisplayName', 'L1');
 plot(indices, x_MCP, 'x', 'DisplayName', 'MCP');
 plot(indices, x_SCAD, 'x', 'DisplayName', 'SCAD');
-plot(indices, x_TL1, 'x', 'DisplayName', 'TL1');
+%plot(indices, x_TL1, 'x', 'DisplayName', 'TL1');
 plot(indices, x_cauchy, 'x', 'DisplayName', 'Cauchy priory');
 %plot(indices, truncate(x_arctan, threshold), 'x', 'DisplayName', 'Arctan');
 plot(indices, x_L1_half_L2, 'x', 'DisplayName', 'L1-1/2*L2');
@@ -164,6 +164,9 @@ plot(indices, x_L1_double_L2, 'x', 'DisplayName', 'L1-2*L2');
 
 
 legend('Location', 'NorthWest');
+
+hold off;
+
 
 dense_x_hat = nnz(truncate(x_hat, threshold));
 dense_L1_L2 = nnz(truncate(x_L1_L2, threshold));
@@ -176,7 +179,6 @@ dense_cauchy = nnz(truncate(x_cauchy, threshold));
 dense_L1_half_L2 = nnz(truncate(x_L1_half_L2, threshold));
 dense_L1_double_L2 = nnz(truncate(x_L1_double_L2, threshold));
 
-hold off;
 
 function [dg] = dg_2_norm(x) 
     if x == 0
