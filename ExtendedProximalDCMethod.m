@@ -34,7 +34,7 @@ L = max_eigval;
 % Choose alpha_max as close as possible to 1 without reaching 1
 alpha_max = 0.99;
 nu_curr = 1;
-n0 = 100;
+n0 = 10000;
 max_diff = 0;
 
 first_iteration = true;
@@ -61,7 +61,7 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr, itera
     end
     
     alpha = alpha_max * (nu_prev - 1)/nu_curr;
-    alpha=0;
+    %alpha = 1;
     
     w = x_curr + alpha.*(x_curr - x_prev);
     

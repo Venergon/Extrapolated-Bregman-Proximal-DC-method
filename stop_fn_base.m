@@ -11,6 +11,9 @@ function [stop] = stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration)
     
     if (obj_difference < 0) 
         fprintf('Error: iteration: %d obj_difference %e is negative\n', iteration, obj_difference);
+        fprintf('Inf norm diff of vectors: %e\n', norm(x_prev - x_curr, Inf));
+        fprintf('2 norm diff of vectors: %e\n', norm(x_prev - x_curr, 2));
+        fprintf('\n');
         %fprintf('Prev x %e, curr x %e diff %e\n', norm(x_prev, 2), norm(x_curr, 2), norm(x_prev - x_curr, 2));
         %throw(MException('TEST'));
     elseif (obj_difference < rtol*obj_fn(x_hat))
