@@ -12,6 +12,7 @@ density = 0.01;
 noise_mu = 0;
 noise_sigma = 0.1;
 threshold_iterations = 10;
+theta_SCAD = 5;
 
 rng(0);
 
@@ -26,10 +27,10 @@ b = b_hat + noise;
 
 x0 = A \ b;
 
-dg = @(x) (0);
+dg = @(x) (sign(x).*(min(theta_SCAD*lambda, abs(x)) - lambda)/(theta_SCAD - 1));
 
 gamma = 0.001;
-obj_fn = @(x) (1/2*norm(A*x-b, 2)^2 + penalty_cauchy(x, lambda, gamma));
+obj_fn = @(x) (1/2*norm(A*x-b, 2)^2 + penalty_SCAD(x, lambda, gamma));
 
 stop_fn = @(x_prev, x_curr, iteration) (stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration));
 
@@ -38,7 +39,7 @@ obj_fn(x_hat)
 
 disp('Starting Extended Bregman Proximal DC Method');
 tic
-thresh = get_argmin_function(lambda, 'cauchy', 'L2', threshold_iterations);
+thresh = get_argmin_function(lambda, 'L1', 'L2', threshold_iterations);
 x_bregman = ExtendedProximalDCMethod(A, b, x0, dg, thresh, stop_fn);
 time_bregman = toc
 disp('Finished Extended Bregman Proximal DC Method');

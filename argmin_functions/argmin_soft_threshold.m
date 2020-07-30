@@ -1,6 +1,6 @@
 function [x] = argmin_soft_threshold(A, b, dD, w, xi, L, t, x_prev, lambda, max_eigval, thresholding_iterations)
 % Calculates a value x \in argmin_{x} {lambda*|x|_1 + <\nabla f(w_k) - xi_k, x - w_k> +
-% L/2*||x - w_k||_2^2 + 1/t_k*(1/2)*(D(x - x_curr))^2
+% L/2*||x - w_k||_2^2 + 1/t_k*(D(x - x_curr))
 % Where f(x) = 1/2 * ||Ax - b||^2
 % And D is a distance function (currently ||x - y||_2 distance)
 
@@ -17,7 +17,7 @@ df = A'*(A*w - b);
 n = length(x_prev);
 step_size = 1/(2*max_eigval);
 
-dh = @(x) (df - xi.*ones(n, 1) + L.*(x-w) + (1/t).*dD(x, x_prev));
+dh = @(x) (df - xi + L.*(x-w) + (1/t).*dD(x, x_prev));
 
 x = x_prev;
 

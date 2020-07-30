@@ -1,8 +1,8 @@
 % Test Extended Bregman Proximal DC method using an image
-image_name = 'Barbara.tif';
+image_name = 'Lena512.pgm';
 rng(0);
 
-rtol = 1e-20;
+rtol = 1e-10;
 mu = 0;
 sigma = 50;
 threshold_iterations = 10;
@@ -28,42 +28,74 @@ noisy_image = image + round(noise);
 
 subplot(2, 2, 2);
 imshow(uint8(noisy_image));
-title(sprintf('Noisy Image, PSNR = %2.2f DB', psnr(uint8(noisy_image), uint8(image))));
+title(sprintf('Noisy Image, PSNR = %2.2f dB', psnr(uint8(noisy_image), uint8(image))));
 
 
 image_vector = reshape(noisy_image, height*width, 1);
-transformed_image_vector = fft(image_vector);
-A = speye(height*width);
+transformed_image_vector_complex = fft(image_vector);
+transformed_image_vector = split_complex(transformed_image_vector_complex);
+A = speye(length(transformed_image_vector));
 b = transformed_image_vector;
-
-dg_0 = @(x) (0);
-dg_L2 = @(x) lambda*dg_2_norm(x);
-
-obj_fn_L1 = @(x) (1/2*norm(A*x-b)^2 + lambda * norm(x, 1));
-obj_fn_L1_L2 = @(x) (1/2*norm(A*x-b)^2 + lambda *(norm(x, 1) - norm(x, 2)));
-
 
 x_hat = transformed_image_vector;
 x0 = transformed_image_vector;
 
+dg_L2 = @(x) lambda*dg_2_norm(x);
+dg_half_L2 = @(x) lambda*dg_2_norm(x)/2;
+dg_double_L2 = @(x) lambda*dg_2_norm(x)*2;
+dg_0 = @(x) (0);
+
+% DC decompositions of MCP, SCAD and Transformed L1 come from 
+% https://link.springer.com/article/10.1007/s10589-017-9954-1
+% All three use the L1 norm as the positive convex part
+dg_MCP = @(x) (lambda.*sign(x).*min(1, abs(x)/(theta_MCP*lambda)));
+dg_SCAD = @(x) (sign(x).*(min(theta_SCAD*lambda, abs(x)) - lambda)/(theta_SCAD - 1));
+dg_TL1 = @(x) (sign(x).*((a+1)/(a)) - sign(x).*(a^2 + a)./((a + abs(x)).^2));
+
+dg_cauchy = @(x) lambda*2*x;
+
+obj_fn_L1_L2 = @(x) (1/2*norm(A*x-b)^2 + lambda *(norm(x, 1) - norm(x, 2)));
+obj_fn_L1_half_L2 = @(x) (1/2*norm(A*x-b)^2 + lambda *(norm(x, 1) - (1/2)*norm(x, 2)));
+obj_fn_L1_double_L2 = @(x) (1/2*norm(A*x-b)^2 + lambda *(norm(x, 1) - 2*norm(x, 2)));
+
+obj_fn_L1 = @(x) (1/2*norm(A*x-b)^2 + lambda * norm(x, 1));
+obj_fn_MCP = @(x) (1/2*norm(A*x-b)^2 + penalty_MCP(x, lambda, theta_MCP));
+obj_fn_SCAD = @(x) (1/2*norm(A*x-b)^2 + penalty_SCAD(x, lambda, theta_SCAD));
+obj_fn_TL1 = @(x) (1/2*norm(A*x-b)^2 + penalty_TL1(x, lambda, a));
+obj_fn_cauchy = @(x) (1/2*norm(A*x-b)^2 + penalty_cauchy(x, lambda, gamma_cauchy));
+
 stop_fn = @(obj_fn)  (@(x_prev, x_curr, iteration)(stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration)));
 
-stop_fn_L1 = stop_fn(obj_fn_L1);
 stop_fn_L1_L2 = stop_fn(obj_fn_L1_L2);
+stop_fn_L1_half_L2 = stop_fn(obj_fn_L1_half_L2);
+stop_fn_L1_double_L2 = stop_fn(obj_fn_L1_double_L2);
+
+stop_fn_L1 = stop_fn(obj_fn_L1);
+stop_fn_MCP = stop_fn(obj_fn_MCP);
+stop_fn_SCAD = stop_fn(obj_fn_SCAD);
+stop_fn_TL1 = stop_fn(obj_fn_TL1);
+stop_fn_cauchy = stop_fn(obj_fn_cauchy);
+stop_fn_arctan = stop_fn(obj_fn_arctan);
+
 
 argmin_fn_soft_lambda = get_argmin_function(lambda, 'L1', 'L2', threshold_iterations);
+argmin_fn_soft_TL1 = get_argmin_function((a+1)/a, 'L1', 'L2', threshold_iterations);
+argmin_fn_cauchy_lambda = get_argmin_function(lambda, 'cauchy', 'L2', threshold_iterations);
+argmin_fn_arctan_lambda = get_argmin_function(lambda, 'arctan', 'L2', threshold_iterations);
 
 tic
 disp('Calculating solution to problem');
 x_approx = ExtendedProximalDCMethod(A, b, x0, dg_0, argmin_fn_soft_lambda, stop_fn_L1);
 t = toc
 
-x_untransformed = ifft(x_approx);
+x_approx_combined = combine_complex(x_approx);
+
+x_untransformed = ifft(x_approx_combined);
 image_approx = reshape(x_untransformed, height, width);
 
 subplot(2, 2, 3);
 imshow(uint8(image_approx));
-title(sprintf('Denoised Image, PSNR = %2.2f DB', psnr(uint8(image_approx), uint8(image))));
+title(sprintf('Denoised Image, PSNR = %2.2f dB', psnr(uint8(image_approx), uint8(image))));
 
 
 function [dg] = dg_2_norm(x) 

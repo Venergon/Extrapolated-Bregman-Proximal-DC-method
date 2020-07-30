@@ -10,9 +10,10 @@ function [stop] = stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration)
      end
     
     if (obj_difference < 0) 
-        fprintf('Error: iteration: %d obj_difference %e is negative\n', iteration, obj_difference);
+        fprintf('Error: iteration: %d obj_difference %e is negative (curr obj=%e)\n', iteration, obj_difference, obj_fn(x_curr));
         fprintf('Inf norm diff of vectors: %e\n', norm(x_prev - x_curr, Inf));
         fprintf('2 norm diff of vectors: %e\n', norm(x_prev - x_curr, 2));
+        fprintf('Eps of largest element in x_prev: %e\n', eps(max(x_prev)));
         fprintf('\n');
         %fprintf('Prev x %e, curr x %e diff %e\n', norm(x_prev, 2), norm(x_curr, 2), norm(x_prev - x_curr, 2));
         %throw(MException('TEST'));

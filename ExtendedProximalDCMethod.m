@@ -24,7 +24,7 @@ function [x] = ExtendedProximalDCMethod(A, b, x0, dg_2, calculate_argmin, stop_f
 x_curr = x0;
 x_prev = x_curr;
 
-max_eigval = eigs(A'*A, 1);
+max_eigval = abs(eigs(A'*A, 1));
 
 % Calculate L as a lipschitz constant for the gradient of 1/2*|Ax - b|^2
 L = max_eigval;
@@ -61,7 +61,7 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr, itera
     end
     
     alpha = alpha_max * (nu_prev - 1)/nu_curr;
-    %alpha = 1;
+    alpha = 0;
     
     w = x_curr + alpha.*(x_curr - x_prev);
     
