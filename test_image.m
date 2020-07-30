@@ -2,7 +2,7 @@
 image_name = 'Lena512.pgm';
 rng(0);
 
-rtol = 1e-10;
+rtol = 1e-20;
 mu = 0;
 sigma = 50;
 threshold_iterations = 10;
@@ -49,7 +49,7 @@ dg_0 = @(x) (0);
 % https://link.springer.com/article/10.1007/s10589-017-9954-1
 % All three use the L1 norm as the positive convex part
 dg_MCP = @(x) (lambda.*sign(x).*min(1, abs(x)/(theta_MCP*lambda)));
-dg_SCAD = @(x) (sign(x).*(min(theta_SCAD*lambda, abs(x)) - lambda)/(theta_SCAD - 1));
+dg_SCAD = @(x) (sign(x).*max(min(theta_SCAD*lambda, abs(x)) - lambda, 0)/(theta_SCAD - 1));
 dg_TL1 = @(x) (sign(x).*((a+1)/(a)) - sign(x).*(a^2 + a)./((a + abs(x)).^2));
 
 dg_cauchy = @(x) lambda*2*x;
@@ -85,7 +85,7 @@ argmin_fn_arctan_lambda = get_argmin_function(lambda, 'arctan', 'L2', threshold_
 
 tic
 disp('Calculating solution to problem');
-x_approx = ExtendedProximalDCMethod(A, b, x0, dg_0, argmin_fn_soft_lambda, stop_fn_L1);
+x_approx = ExtendedProximalDCMethod(A, b, x0, dg_MCP, argmin_fn_soft_lambda, stop_fn_MCP);
 t = toc
 
 x_approx_combined = combine_complex(x_approx);

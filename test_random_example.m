@@ -42,7 +42,7 @@ dg_0 = @(x) (0);
 % https://link.springer.com/article/10.1007/s10589-017-9954-1
 % All three use the L1 norm as the positive convex part
 dg_MCP = @(x) (lambda.*sign(x).*min(1, abs(x)/(theta_MCP*lambda)));
-dg_SCAD = @(x) (sign(x).*(min(theta_SCAD*lambda, abs(x)) - lambda)/(theta_SCAD - 1));
+dg_SCAD = @(x) (sign(x).*max(min(theta_SCAD*lambda, abs(x)) - lambda, 0)/(theta_SCAD - 1));
 dg_TL1 = @(x) (sign(x).*((a+1)/(a)) - sign(x).*(a^2 + a)./((a + abs(x)).^2));
 
 dg_cauchy = @(x) lambda*2*x;

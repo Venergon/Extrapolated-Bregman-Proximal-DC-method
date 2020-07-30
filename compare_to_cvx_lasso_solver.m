@@ -27,7 +27,8 @@ b = b_hat + noise;
 
 x0 = A \ b;
 
-dg = @(x) (sign(x).*(min(theta_SCAD*lambda, abs(x)) - lambda)/(theta_SCAD - 1));
+dg = @(x) (sign(x).*max(min(theta_SCAD*lambda, abs(x)) - lambda, 0)/(theta_SCAD - 1));
+
 
 gamma = 0.001;
 obj_fn = @(x) (1/2*norm(A*x-b, 2)^2 + penalty_SCAD(x, lambda, gamma));
