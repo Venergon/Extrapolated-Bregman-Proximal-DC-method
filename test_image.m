@@ -24,7 +24,7 @@ imshow(uint8(image));
 title('Original Image');
 
 noise = normrnd(mu, sigma, height, width);
-noisy_image = image + round(noise);
+noisy_image = image + noise;
 
 subplot(2, 2, 2);
 imshow(uint8(noisy_image));
@@ -75,17 +75,15 @@ stop_fn_MCP = stop_fn(obj_fn_MCP);
 stop_fn_SCAD = stop_fn(obj_fn_SCAD);
 stop_fn_TL1 = stop_fn(obj_fn_TL1);
 stop_fn_cauchy = stop_fn(obj_fn_cauchy);
-stop_fn_arctan = stop_fn(obj_fn_arctan);
 
 
 argmin_fn_soft_lambda = get_argmin_function(lambda, 'L1', 'L2', threshold_iterations);
 argmin_fn_soft_TL1 = get_argmin_function((a+1)/a, 'L1', 'L2', threshold_iterations);
 argmin_fn_cauchy_lambda = get_argmin_function(lambda, 'cauchy', 'L2', threshold_iterations);
-argmin_fn_arctan_lambda = get_argmin_function(lambda, 'arctan', 'L2', threshold_iterations);
 
 tic
 disp('Calculating solution to problem');
-x_approx = ExtendedProximalDCMethod(A, b, x0, dg_MCP, argmin_fn_soft_lambda, stop_fn_MCP);
+x_approx = ExtendedProximalDCMethod(A, b, x0, dg_0, argmin_fn_soft_lambda, stop_fn_L1);
 t = toc
 
 x_approx_combined = combine_complex(x_approx);

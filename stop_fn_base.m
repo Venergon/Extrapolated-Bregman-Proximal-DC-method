@@ -14,11 +14,14 @@ function [stop] = stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration)
         fprintf('Inf norm diff of vectors: %e\n', norm(x_prev - x_curr, Inf));
         fprintf('2 norm diff of vectors: %e\n', norm(x_prev - x_curr, 2));
         fprintf('Eps of largest element in x_prev: %e\n', eps(max(x_prev)));
+        fprintf('%f\n', norm(x_prev, 1));
+
         fprintf('\n');
+
         %fprintf('Prev x %e, curr x %e diff %e\n', norm(x_prev, 2), norm(x_curr, 2), norm(x_prev - x_curr, 2));
         %throw(MException('TEST'));
     elseif (obj_difference < rtol*obj_fn(x_hat))
         stop = 1;
     end
-    
+
 end

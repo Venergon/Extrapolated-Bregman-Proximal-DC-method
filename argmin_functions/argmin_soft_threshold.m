@@ -15,11 +15,20 @@ function [x] = argmin_soft_threshold(A, b, dD, w, xi, L, t, x_prev, lambda, max_
 df = A'*(A*w - b);
 
 n = length(x_prev);
-step_size = 1/(2*max_eigval);
+
+%if norm(x_prev, 1) <= 826292734.775
+%    step_size = 0.9/(2*max_eigval*length(x_prev));
+%else
+    step_size = 0.9/(2*max_eigval);
+%end
+%step_size = 1/100000;
 
 dh = @(x) (df - xi + L.*(x-w) + (1/t).*dD(x, x_prev));
 
 x = x_prev;
+
+obj_fn = @(x) (norm(x, 1) + sum((df - xi).*(x-w)) + L/2*(norm(x-w, 2)^2) + 1/(2*t) * (norm(x-x_prev, 2)^2));
+
 
 for iteration = 1:thresholding_iterations
     inner_vector = x_prev - step_size*dh(x);
@@ -28,5 +37,4 @@ for iteration = 1:thresholding_iterations
         x(i) = sign(inner_vector(i))*max((abs(inner_vector(i)) - lambda*step_size), 0);
     end
 end
-
 end

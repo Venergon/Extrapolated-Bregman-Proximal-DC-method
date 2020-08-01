@@ -15,8 +15,6 @@ df = A'*(A*w - b);
 
 M = 2;
 
-n = length(x_prev);
-
 x = x_prev;
 
 % Formulate it as ax^3 + bx^2 + cx + d
