@@ -19,8 +19,7 @@ beta_arctan = sqrt(3)/3;
 gamma_arctan = pi/6;
 alpha_arctan = 1;
 
-M_arctan = (3*alpha_arctan^2*beta_arctan^(2/3))/(4*gamma_arctan);
-
+M_arctan = (2*alpha_arctan^2*beta_arctan)/(gamma_arctan*(1+beta_arctan^2));
 
 A = rand(n, m);
 
@@ -152,12 +151,14 @@ plot(indices, truncate(x_MCP, threshold), 'x', 'DisplayName', 'MCP');
 plot(indices, truncate(x_SCAD, threshold), 'x', 'DisplayName', 'SCAD');
 plot(indices, truncate(x_TL1, threshold), 'x', 'DisplayName', 'TL1');
 plot(indices, truncate(x_cauchy, threshold), 'x', 'DisplayName', 'Cauchy priory');
-%plot(indices, truncate(x_arctan, threshold), 'x', 'DisplayName', 'Arctan');
+plot(indices, truncate(x_arctan, threshold), 'x', 'DisplayName', 'Arctan');
 plot(indices, truncate(x_L1_half_L2, threshold), 'x', 'DisplayName', 'L1-1/2*L2');
 plot(indices, truncate(x_L1_double_L2, threshold), 'x', 'DisplayName', 'L1-2*L2');
 
 
 legend('Location', 'NorthWest');
+
+hold off;
 
 dense_x_hat = nnz(truncate(x_hat, threshold));
 dense_L1_L2 = nnz(truncate(x_L1_L2, threshold));
@@ -166,11 +167,10 @@ dense_MCP = nnz(truncate(x_MCP, threshold));
 dense_SCAD = nnz(truncate(x_SCAD, threshold));
 dense_TL1 = nnz(truncate(x_TL1, threshold));
 dense_cauchy = nnz(truncate(x_cauchy, threshold));
-%dense_arctan = nnz(truncate(x_arctan, threshold));
+dense_arctan = nnz(truncate(x_arctan, threshold));
 dense_L1_half_L2 = nnz(truncate(x_L1_half_L2, threshold));
 dense_L1_double_L2 = nnz(truncate(x_L1_double_L2, threshold));
 
-hold off;
 
 function [dg] = dg_2_norm(x) 
     if x == 0

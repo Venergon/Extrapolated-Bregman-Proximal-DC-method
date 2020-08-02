@@ -3,7 +3,7 @@ function [stop] = stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration)
     
     stop = 0;
     
-     if (mod(iteration, 1000) == 0)
+     if (mod(iteration, 10) == 0)
         fprintf('Iteration: %d\n', iteration);
         fprintf('Previous 2 obj values: %e %e\n', obj_fn(x_prev), obj_fn(x_curr));
         fprintf('Diff: %e\n', obj_fn(x_prev) - obj_fn(x_curr));
@@ -20,6 +20,7 @@ function [stop] = stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration)
 
         %fprintf('Prev x %e, curr x %e diff %e\n', norm(x_prev, 2), norm(x_curr, 2), norm(x_prev - x_curr, 2));
         %throw(MException('TEST'));
+        stop = 1
     elseif (obj_difference < rtol*obj_fn(x_hat))
         stop = 1;
     end
