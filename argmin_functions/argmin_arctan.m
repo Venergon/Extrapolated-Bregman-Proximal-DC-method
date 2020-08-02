@@ -31,40 +31,40 @@ x = x_prev;
 
 % Formulate it as ax^3 + bx^2 + cx + d
 % Start with everything but the parts relying on D
-a = (lambda*M + L).*ones(size(x_prev));
+a = (M*lambda*alpha^2 + L*alpha^2).*ones(size(x_prev));
 a_pos = a;
 a_neg = a;
 
-b_pos = ones(size(x_prev)).*(6*lambda*M + df - xi + 6*alpha*L - w*L);
-b_neg = ones(size(x_prev)).*(-6*lambda*M + df - xi - 6*alpha*L - w*L);
+b_pos = ones(size(x_prev)).*(2*alpha*M*lambda + alpha^2*df - xi*alpha^2 + 2*L*alpha - L*alpha^2*w);
+b_neg = ones(size(x_prev)).*(-2*alpha*M*lambda + alpha^2*df - xi*alpha^2 - 2*L*alpha - L*alpha^2*w);
 
-c_pos = ones(size(x_prev)).*(4*lambda*M + 6*alpha*df - 6*alpha*xi + 4*L - 6*alpha*w*L);
-c_neg = ones(size(x_prev)).*(4*lambda*M - 6*alpha*df + 6*alpha*xi + 4*L + 6*alpha*w*L);
+c_pos = ones(size(x_prev)).*(beta^2*M*lambda + M*lambda + 2*alpha*df - 2*xi*alpha + L*beta^2 + L - 2*L*alpha*w);
+c_neg = ones(size(x_prev)).*(beta^2*M*lambda + M*lambda - 2*alpha*df + 2*xi*alpha + L*beta^2 + L + 2*L*alpha*w);
 
-d_pos = ones(size(x_prev)).*(6*sqrt(3)*lambda*alpha/pi + 4*df - 4*xi - 4*L*w);
-d_neg = ones(size(x_prev)).*(-6*sqrt(3)*lambda*alpha/pi + 4*df - 4*xi - 4*L*w);
+d_pos = ones(size(x_prev)).*(beta^2*df + df - beta^2*xi - xi - L*beta^2*w - L*w + alpha*beta*lambda/gamma);
+d_neg = ones(size(x_prev)).*(beta^2*df + df - beta^2*xi - xi - L*beta^2*w - L*w - alpha*beta*lambda/gamma);
 
 % Add the terms based on D
 % TODO: Currently assume using 1/2*||x-x_prev||_2^2
 % For which d/dx = (x-x_prev)
-a_pos = a_pos + 1./t;
-a_neg = a_neg + 1./t;
+a_pos = a_pos + alpha^2./t;
+a_neg = a_neg + alpha^2./t;
 
-b_pos = b_pos + (6.*alpha-x_prev)./t;
-b_neg = b_neg + (-6.*alpha-x_prev)./t;
+b_pos = b_pos + (2*alpha - alpha^2*x_prev)./t;
+b_neg = b_neg + (-2*alpha - alpha^2*x_prev)./t;
 
-c_pos = c_pos + (4-6.*alpha.*x_prev)./t;
-c_neg = c_neg + (4+6.*alpha.*x_prev)./t;
+c_pos = c_pos + (beta^2 + 1 - 2*alpha*x_prev)./t;
+c_neg = c_neg + (beta^2 + 1 + 2*alpha*x_prev)./t;
 
-d_pos = d_pos + (-4.*x_prev)./t;
-d_neg = d_neg + (-4.*x_prev)./t;
+d_pos = d_pos + (-beta^2*x_prev - x_prev)./t;
+d_neg = d_neg + (-beta^2*x_prev - x_prev)./t;
 
 for i=1:n
     pos = trig_solve_cubic(a_pos(i), b_pos(i), c_pos(i), d_pos(i), @(x) 1);
     neg = trig_solve_cubic(a_neg(i), b_neg(i), c_neg(i), d_neg(i), @(x) 1);
     
     % Can have zeros at any of these points
-    possible_minima = [pos, neg, 0];
+    possible_minima = [pos, neg, 0];%, x_prev(i)];
     
     min_value = Inf;
     min_point = 0;
@@ -72,6 +72,7 @@ for i=1:n
         curr_point = possible_minima(j);
         curr_value = penalty_arctan(curr_point, lambda, alpha, beta, gamma) + lambda*M/2*curr_point^2 + (df(i)-xi(i))*(curr_point-w(i)) + L/2*(curr_point - w(i))^2 + 1/(2*t)*(curr_point-x_prev(i))^2;
 
+        %curr_value
         if curr_value < min_value
             min_value = curr_value;
             min_point = curr_point;
@@ -80,6 +81,23 @@ for i=1:n
     %possible_minima
     %min_point
     %x_prev(i)
+    
+    %f_pos = @(x) (a_pos(i)*x.^3 + b_pos(i)*x.^2 + c_pos(i)*x + d_pos(i));
+    %f_neg = @(x) (a_neg(i)*x.^3 + b_neg(i)*x.^2 + c_neg(i)*x + d_neg(i));
+    
+    
+    %pos_vals = f_pos(possible_minima)
+    %neg_vals = f_neg(possible_minima)
+    
+    %if (min_point == x_prev(i))
+    %    g = @(x) (lambda*alpha*beta*sign(x)/(gamma) + ((alpha^2*x^2 + 2*alpha*abs(x) + beta^2 + 1))*(M*lambda*x + df(i) - xi(i) + L*(x-w(i)) + 1/t * (x-x_prev(i))));
+    %    y = fzero(g, 0)
+    %    g(y)
+    %    f_pos(y)
+    %    f_neg(y)
+    %    diff = @(x)((g(x) - g(0)) - (f_pos(x) - f_pos(0)));
+    %    error('dsgfdgs');
+    %end
 
     x(i) = min_point;
 end
