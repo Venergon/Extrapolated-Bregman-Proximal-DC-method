@@ -3,6 +3,12 @@
 tol = 1e-10;
 lambda = 1;
 
+beta_arctan = sqrt(3)/3;
+gamma_arctan = pi/6;
+alpha_arctan = 1;
+
+M_arctan = (2*alpha_arctan^2*beta_arctan)/(gamma_arctan*(1+beta_arctan^2));
+
 
 A = [1, -1, 0, 0, 0, 0;
     1, 0, -1, 0, 0, 0;
@@ -12,6 +18,7 @@ A = [1, -1, 0, 0, 0, 0;
 
 x_ideal = [0; 0; 0; 20; 40; -18];
 b = A*x_ideal;
+
 
 % Because there's no noise, the least squares solution will give an exact
 % solution to the ||Ax - b|| = 0 but not necessarily the solution to the
@@ -42,14 +49,14 @@ dg_cauchy = @(x) lambda*2*x;
 dg_arctan = @(x) lambda*M_arctan*x;
 
 
-dg = dg_cauchy;
-obj_fn = @(x) (1/2*norm(A*x-b)^2 + penalty_cauchy(x, lambda, gamma_cauchy));
+dg = dg_arctan;
+obj_fn = @(x) (1/2*norm(A*x-b)^2 + penalty_arctan(x, lambda, alpha_arctan, beta_arctan, gamma_arctan));
 
 stop_fn = @(x_prev, x_curr, iteration)(obj_fn(x_curr) < obj_fn(x_prev) && obj_fn(x_prev) - obj_fn(x_curr) < tol);
 
 
 threshold_iterations = 10;
-argmin_function = get_argmin_function(lambda, 'cauchy', 'L2', threshold_iterations);
+argmin_function = get_argmin_function(lambda, 'arctan', 'L2', threshold_iterations);
 x_approx = ExtendedProximalDCMethod(A, b, x0, dg, argmin_function, stop_fn);
 b_approx = A*x_approx;
 

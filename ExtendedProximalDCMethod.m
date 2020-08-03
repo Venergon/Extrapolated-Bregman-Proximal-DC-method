@@ -60,8 +60,8 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr, itera
         nu_curr = (1 + sqrt(1 + 4*nu_prev^2))/2;
     end
     
-    %alpha = alpha_max * (nu_prev - 1)/nu_curr;
-    alpha = 0;
+    alpha = alpha_max * (nu_prev - 1)/nu_curr;
+    %alpha = 0;
     
     w = x_curr + alpha.*(x_curr - x_prev);
     
