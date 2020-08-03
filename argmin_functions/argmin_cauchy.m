@@ -19,19 +19,19 @@ x = x_prev;
 
 % Formulate it as ax^3 + bx^2 + cx + d
 % Start with everything but the parts relying on D
-a = (2*lambda*M + L)*ones(size(x));
+a = (lambda*M + L)*ones(size(x));
 b = df - xi - L*w;
-c = (2*lambda + 2*lambda*M*gamma + gamma*L)*ones(size(x));
+c = (2*lambda*gamma + lambda*M*gamma + gamma*L)*ones(size(x));
 d = gamma*df - xi*gamma - gamma*L*w;
 
 % Add the terms based on D
 % Those being x^2/(2t) *(d/dx D) + gamma/(2t)*(d/dx D)
 % TODO: Currently assume using 1/2*||x-x_prev||_2^2
 % For which d/dx = (x-x_prev)
-a = a + 1/(2*t);
-b = b - x_prev/(2*t);
-c = c + gamma/(2*t);
-d = d - gamma*x_prev/(2*t);
+a = a + 1/(t);
+b = b - x_prev/(t);
+c = c + gamma/(t);
+d = d - gamma*x_prev/(t);
 
 %x = fast_solve_cubic(a, b, c, d);
 

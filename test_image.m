@@ -2,7 +2,7 @@
 image_name = 'Lena512.pgm';
 rng(0);
 
-rtol = 1e-10;
+rtol = 1e-20;
 mu = 0;
 sigma = 50;
 threshold_iterations = 10;
@@ -10,13 +10,15 @@ theta_MCP = 5;
 theta_SCAD = 5;
 a = 1;
 gamma_cauchy = 2;
-lambda = 3000;
+lambda = 30000;
 
 beta_arctan = sqrt(3)/3;
 gamma_arctan = pi/6;
 alpha_arctan = 1;
 
 M_arctan = (2*alpha_arctan^2*beta_arctan)/(gamma_arctan*(1+beta_arctan^2));
+
+M_cauchy = 2;
 
 image = imread(strcat('images/', image_name));
 image = imresize(image, 1);
@@ -56,7 +58,7 @@ dg_MCP = @(x) (lambda.*sign(x).*min(1, abs(x)/(theta_MCP*lambda)));
 dg_SCAD = @(x) (sign(x).*max(min(theta_SCAD*lambda, abs(x)) - lambda, 0)/(theta_SCAD - 1));
 dg_TL1 = @(x) (sign(x).*((a+1)/(a)) - sign(x).*(a^2 + a)./((a + abs(x)).^2));
 
-dg_cauchy = @(x) lambda*2*x;
+dg_cauchy = @(x) lambda*M_cauchy*x;
 dg_arctan = @(x) lambda*M_arctan*x;
 
 obj_fn_L1_L2 = @(x) (1/2*norm(A*x-b)^2 + lambda *(norm(x, 1) - norm(x, 2)));
@@ -91,7 +93,7 @@ argmin_fn_arctan_lambda = get_argmin_function(lambda, 'arctan', 'L2', threshold_
 
 tic
 disp('Calculating solution to problem');
-x_approx = ExtendedProximalDCMethod(A, b, x0, dg_arctan, argmin_fn_arctan_lambda, stop_fn_arctan);
+x_approx = ExtendedProximalDCMethod(A, b, x0, dg_cauchy, argmin_fn_cauchy_lambda, stop_fn_cauchy);
 t = toc
 
 x_approx_combined = combine_complex(x_approx);

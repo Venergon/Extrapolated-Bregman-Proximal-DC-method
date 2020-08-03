@@ -2,10 +2,10 @@
 % nXm, with some gaussian noise
 rtol = 1e-4;
 lambda = 10;
-n = 1000;
-m = 2000;
+n = 1024;
+m = 1024;
 matrix_noise = 0.1;
-density = 0.01;
+density = 0.1;
 noise_mu = 0;
 noise_sigma = 0.1;
 threshold_iterations = 10;
@@ -22,15 +22,24 @@ M_arctan = (3*alpha_arctan^2*beta_arctan^(2/3))/(4*gamma_arctan);
 
 rng(0);
 
-% Create a coherent matrix by having each column have the same vector with
-% some additional noise
-% The base vector that is in every column
-A_base_vec = rand(1, m);
-A_base = repmat(A_base_vec, n, 1);
+% Generate a highly coherent matrix using the oversampled discrete cosine
+% transform from page 27 of https://arxiv.org/pdf/2003.04124.pdf
+P = m;
+F = 10;
+w = rand(1, P)';
+dct = @(w, j) 1/sqrt(P) .* cos(2.*pi.*w.*j./F);
+A_base = zeros(n, m);
+for j = 1:n
+    A_base(j, :) = dct(w, j);
+end
 A_noise = matrix_noise*rand(n, m);
 A = A_base + A_noise;
 
 x_hat = sprand(m, 1, density);
+% Normalise x_hat to have maximum magnitude of 1
+%if (norm(x_hat, Inf) > 1)
+%    x_hat = x_hat ./ norm(x_hat, Inf);
+%end
 b_hat = A*x_hat;
 
 noise = normrnd(noise_mu, noise_sigma, n, 1);
@@ -86,7 +95,7 @@ argmin_fn_arctan_lambda = get_argmin_function(lambda, 'arctan', 'L2', threshold_
 
 tic
 disp('Calculating solution to arctan problem');
-%x_arctan = ExtendedProximalDCMethod(A, b, x0, dg_arctan, argmin_fn_arctan_lambda, stop_fn_arctan);
+x_arctan = ExtendedProximalDCMethod(A, b, x0, dg_arctan, argmin_fn_arctan_lambda, stop_fn_arctan);
 t_arctan = toc
 
 tic
@@ -141,7 +150,7 @@ t_L1_half_L2 = toc
 
 tic
 disp('Calculating solution to L1-2*L2 problem');
-x_L1_double_L2 = ExtendedProximalDCMethod(A, b, x0, dg_half_L2, argmin_fn_soft_lambda, stop_fn_L1_double_L2);
+x_L1_double_L2 = ExtendedProximalDCMethod(A, b, x0, dg_double_L2, argmin_fn_soft_lambda, stop_fn_L1_double_L2);
 t_L1_double_L2 = toc
 
 
@@ -158,7 +167,7 @@ plot(indices, x_MCP, 'x', 'DisplayName', 'MCP');
 plot(indices, x_SCAD, 'x', 'DisplayName', 'SCAD');
 %plot(indices, x_TL1, 'x', 'DisplayName', 'TL1');
 plot(indices, x_cauchy, 'x', 'DisplayName', 'Cauchy priory');
-%plot(indices, truncate(x_arctan, threshold), 'x', 'DisplayName', 'Arctan');
+plot(indices, truncate(x_arctan, threshold), 'x', 'DisplayName', 'Arctan');
 plot(indices, x_L1_half_L2, 'x', 'DisplayName', 'L1-1/2*L2');
 plot(indices, x_L1_double_L2, 'x', 'DisplayName', 'L1-2*L2');
 
@@ -175,7 +184,7 @@ dense_MCP = nnz(truncate(x_MCP, threshold));
 dense_SCAD = nnz(truncate(x_SCAD, threshold));
 dense_TL1 = nnz(truncate(x_TL1, threshold));
 dense_cauchy = nnz(truncate(x_cauchy, threshold));
-%dense_arctan = nnz(truncate(x_arctan, threshold));
+dense_arctan = nnz(truncate(x_arctan, threshold));
 dense_L1_half_L2 = nnz(truncate(x_L1_half_L2, threshold));
 dense_L1_double_L2 = nnz(truncate(x_L1_double_L2, threshold));
 
