@@ -5,18 +5,18 @@ rng(0);
 rtol = 1e-30;
 mu = 0;
 sigma = 50;
-threshold_iterations = 1;
+threshold_iterations = 10;
 theta_MCP = 5;
 theta_SCAD = 5;
 a = 1;
 gamma_cauchy = 2;
-lambda = 3000;
+lambda = 30000;
 
 beta_arctan = sqrt(3)/3;
 gamma_arctan = pi/6;
 alpha_arctan = 1;
 
-M_arctan = 2*(2*alpha_arctan^2*beta_arctan)/(gamma_arctan*(1+beta_arctan^2));
+M_arctan = (2*alpha_arctan^2*beta_arctan)/(gamma_arctan*(1+beta_arctan^2));
 
 M_cauchy = 2;
 
@@ -36,9 +36,11 @@ subplot(2, 2, 2);
 imshow(uint8(noisy_image));
 title(sprintf('Noisy Image, PSNR = %2.2f dB', psnr(uint8(noisy_image), uint8(image))));
 
+transformed_image = fft2(noisy_image);
+transformed_image_vector_complex = reshape(transformed_image, height*width, 1);
 
-image_vector = reshape(noisy_image, height*width, 1);
-transformed_image_vector_complex = fft(image_vector);
+%image_vector = reshape(noisy_image, height*width, 1);
+%transformed_image_vector_complex = fft(image_vector);
 transformed_image_vector = split_complex(transformed_image_vector_complex);
 A = speye(length(transformed_image_vector));
 b = transformed_image_vector;
@@ -93,13 +95,15 @@ argmin_fn_arctan_lambda = get_argmin_function(lambda, 'arctan', 'L2', threshold_
 
 tic
 disp('Calculating solution to problem');
-x_approx = ExtendedProximalDCMethod(A, b, x0, dg_arctan, argmin_fn_arctan_lambda, stop_fn_arctan);
+x_approx = ExtendedProximalDCMethod(A, b, x0, dg_0, argmin_fn_soft_lambda, stop_fn_L1);
 t = toc
 
 x_approx_combined = combine_complex(x_approx);
 
-x_untransformed = ifft(x_approx_combined);
-image_approx = reshape(x_untransformed, height, width);
+x_approx_reshaped = reshape(x_approx_combined, height, width);
+image_approx = ifft2(x_approx_reshaped);
+%x_untransformed = ifft(x_approx_combined);
+%image_approx = reshape(x_untransformed, height, width);
 
 subplot(2, 2, 3);
 imshow(uint8(image_approx));

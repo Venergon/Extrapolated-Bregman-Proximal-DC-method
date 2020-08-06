@@ -17,7 +17,7 @@ function [x] = argmin_arctan(A, b, dD, w, xi, L, t, x_prev, lambda, max_eigval, 
 % will need to make a case for each distance function
 df = A'*(A*w - b);
 
-M = 2*(2*alpha^2*beta)/(gamma*(1+beta^2));
+M = (2*alpha^2*beta)/(gamma*(1+beta^2));
 
 n = length(x_prev);
 
