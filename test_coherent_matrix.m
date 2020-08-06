@@ -2,7 +2,7 @@
 % nXm, with some gaussian noise
 rtol = 1e-4;
 lambda = 10;
-n = 1024;
+n = 2048;
 m = 1024;
 matrix_noise = 0.1;
 density = 0.1;

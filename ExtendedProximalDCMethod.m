@@ -45,10 +45,6 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr, itera
     iteration = iteration + 1;
     first_iteration = false;
     
-    if (mod(iteration, 1000) == 0)
-        fprintf('iteration %d\n', iteration);
-    end
-    
     %% Step 1a: Choose alpha_k >= 0 and compute w_k = x_k + alpha_k*(x_k -
     % x_{k-1})
     if (mod(iteration, n0) == 0)
@@ -61,7 +57,7 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr, itera
     end
     
     alpha = alpha_max * (nu_prev - 1)/nu_curr;
-    %alpha = 0;
+    alpha = 0;
     
     w = x_curr + alpha.*(x_curr - x_prev);
     
@@ -70,11 +66,11 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr, itera
     xi = dg_2(x_curr);
     
     %% Step 2: Compute the step size t_k and  update x_{k+1} by letting
-    % x_{k+1} \in argmin_{x} {lambda*|x|_1 + <\nabla f(w_k) - xi_k, x - w_k> +
+    % x_{k+1} \in argmin_{x} {lambda*g_1(x) + <\nabla f(w_k) - xi_k, x - w_k> +
     % L/2*||x - w_k||_2^2 + 1/t_k*D(x, x_k)
     
     % TODO: Currently got a static step size t_k = 1
-    t = 100;
+    t = 0.1;
     
     x_next = calculate_argmin(A, b, w, xi, L, t, x_curr, max_eigval);
    
