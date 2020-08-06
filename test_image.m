@@ -10,7 +10,7 @@ theta_MCP = 5;
 theta_SCAD = 5;
 a = 1;
 gamma_cauchy = 2;
-lambda = 30000;
+lambda = 60;
 
 beta_arctan = sqrt(3)/3;
 gamma_arctan = pi/6;
@@ -39,14 +39,14 @@ title(sprintf('Noisy Image, PSNR = %2.2f dB', psnr(uint8(noisy_image), uint8(ima
 transformed_image = fft2(noisy_image);
 transformed_image_vector_complex = reshape(transformed_image, height*width, 1);
 
-%image_vector = reshape(noisy_image, height*width, 1);
+image_vector = reshape(noisy_image, height*width, 1);
 %transformed_image_vector_complex = fft(image_vector);
-transformed_image_vector = split_complex(transformed_image_vector_complex);
-A = speye(length(transformed_image_vector));
-b = transformed_image_vector;
+%transformed_image_vector = split_complex(transformed_image_vector_complex);
+A = speye(1);%speye(length(transformed_image_vector));
+b = image_vector;
 
-x_hat = transformed_image_vector;
-x0 = transformed_image_vector;
+x_hat = fft(image_vector);
+x0 = fft(image_vector);
 
 dg_L2 = @(x) lambda*dg_2_norm(x);
 dg_half_L2 = @(x) lambda*dg_2_norm(x)/2;
@@ -67,7 +67,7 @@ obj_fn_L1_L2 = @(x) (1/2*norm(A*x-b)^2 + penalty_L1_L2(x, lambda));
 obj_fn_L1_half_L2 = @(x) (1/2*norm(A*x-b)^2 + lambda *(norm(x, 1) - (1/2)*norm(x, 2)));
 obj_fn_L1_double_L2 = @(x) (1/2*norm(A*x-b)^2 + lambda *(norm(x, 1) - 2*norm(x, 2)));
 
-obj_fn_L1 = @(x) (1/2*norm(A*x-b)^2 + penalty_L1(x, lambda));
+obj_fn_L1 = @(x) (1/2*norm(ifft(x)-b)^2 + penalty_L1(x, lambda));
 obj_fn_MCP = @(x) (1/2*norm(A*x-b)^2 + penalty_MCP(x, lambda, theta_MCP));
 obj_fn_SCAD = @(x) (1/2*norm(A*x-b)^2 + penalty_SCAD(x, lambda, theta_SCAD));
 obj_fn_TL1 = @(x) (1/2*norm(A*x-b)^2 + penalty_TL1(x, lambda, a));
@@ -98,12 +98,12 @@ disp('Calculating solution to problem');
 x_approx = ExtendedProximalDCMethod(A, b, x0, dg_0, argmin_fn_soft_lambda, stop_fn_L1);
 t = toc
 
-x_approx_combined = combine_complex(x_approx);
+%x_approx_combined = combine_complex(x_approx);
 
-x_approx_reshaped = reshape(x_approx_combined, height, width);
-image_approx = ifft2(x_approx_reshaped);
-%x_untransformed = ifft(x_approx_combined);
-%image_approx = reshape(x_untransformed, height, width);
+%x_approx_reshaped = reshape(x_approx_combined, height, width);
+%image_approx = ifft2(x_approx_reshaped);
+x_untransformed = ifft(x_approx);
+image_approx = reshape(x_untransformed, height, width);
 
 subplot(2, 2, 3);
 imshow(uint8(image_approx));

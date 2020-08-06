@@ -12,7 +12,7 @@ function [x] = argmin_soft_threshold(A, b, dD, w, xi, L, t, x_prev, lambda, max_
 % \nabla h(x_curr)]_i)(|[x_curr - \nabla h(x_curr)]_i - lambda)
 
 % Represent \nabla f and \nabla h by df and dh respectively
-df = A'*(A*w - b);
+df = 1i*ifft(w).*(ifft(w) - b);%A'*(A*w - b);
 
 n = length(x_prev);
 
@@ -38,9 +38,9 @@ for iteration = 1:thresholding_iterations
     end
 end
 
-if obj_fn(x) > obj_fn(x_prev)
+%if obj_fn(x) > obj_fn(x_prev)
     %x = x_prev;
-    fprintf("Wat\n\n");
+    %fprintf("Wat\n\n");
     
     %f = @(x) (lambda*abs(x) + (df(i) - xi)*(x-w(i)) + L/2*(x - w(i))^2 + 1/(2*t) * (x-x_prev(i))^2);
     %for i=1:n
@@ -57,7 +57,7 @@ if obj_fn(x) > obj_fn(x_prev)
     %    end
     %end
     
-end
+%end
 end
 
         
