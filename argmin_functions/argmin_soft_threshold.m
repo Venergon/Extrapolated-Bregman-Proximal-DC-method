@@ -12,7 +12,7 @@ function [x] = argmin_soft_threshold(A, b, dD, w, xi, L, t, x_prev, lambda, max_
 % \nabla h(x_curr)]_i)(|[x_curr - \nabla h(x_curr)]_i - lambda)
 
 % Represent \nabla f and \nabla h by df and dh respectively
-df = 1i*ifft(w).*(ifft(w) - b);%A'*(A*w - b);
+df = (ifft(w) - b);%A'*(A*w - b);
 
 n = length(x_prev);
 

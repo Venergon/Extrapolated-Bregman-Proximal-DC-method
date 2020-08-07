@@ -10,7 +10,7 @@ theta_MCP = 5;
 theta_SCAD = 5;
 a = 1;
 gamma_cauchy = 2;
-lambda = 60;
+lambda = 2000;
 
 beta_arctan = sqrt(3)/3;
 gamma_arctan = pi/6;
@@ -63,7 +63,7 @@ dg_TL1 = @(x) (sign(x).*((a+1)/(a)) - sign(x).*(a^2 + a)./((a + abs(x)).^2));
 dg_cauchy = @(x) lambda*M_cauchy*x;
 dg_arctan = @(x) lambda*M_arctan*x;
 
-obj_fn_L1_L2 = @(x) (1/2*norm(A*x-b)^2 + penalty_L1_L2(x, lambda));
+obj_fn_L1_L2 = @(x) (1/2*norm(ifft(x)-b)^2 + penalty_L1_L2(x, lambda));
 obj_fn_L1_half_L2 = @(x) (1/2*norm(A*x-b)^2 + lambda *(norm(x, 1) - (1/2)*norm(x, 2)));
 obj_fn_L1_double_L2 = @(x) (1/2*norm(A*x-b)^2 + lambda *(norm(x, 1) - 2*norm(x, 2)));
 
@@ -95,7 +95,7 @@ argmin_fn_arctan_lambda = get_argmin_function(lambda, 'arctan', 'L2', threshold_
 
 tic
 disp('Calculating solution to problem');
-x_approx = ExtendedProximalDCMethod(A, b, x0, dg_0, argmin_fn_soft_lambda, stop_fn_L1);
+x_approx = ExtendedProximalDCMethod(A, b, x0, dg_L2, argmin_fn_soft_lambda, stop_fn_L1_L2);
 t = toc
 
 %x_approx_combined = combine_complex(x_approx);
