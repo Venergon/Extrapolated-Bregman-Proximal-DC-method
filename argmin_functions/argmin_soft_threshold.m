@@ -14,12 +14,7 @@ function [x] = argmin_soft_threshold(A, b, dD, w, xi, L, t, x_prev, lambda, max_
 % Represent \nabla f and \nabla h by df and dh respectively
 df = A'*(A*w - b);
 
-%if norm(x_prev, 1) <= 826292734.775
-%    step_size = 0.9/(2*max_eigval*length(x_prev));
-%else
-    step_size = 0.9/(2*(lambda + L + 1/t));
-%end
-%step_size = 1/100000;
+step_size = 0.9/(2*(lambda + L + 1/t));
 
 dh = @(x) (df - xi + L.*(x-w) + (1/t).*dD(x, x_prev));
 
