@@ -13,7 +13,7 @@ function [stop] = stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration)
         fprintf('Error: iteration: %d obj_difference %e is negative (curr obj=%e)\n', iteration, obj_difference, obj_fn(x_curr));
         fprintf('Inf norm diff of vectors: %e\n', norm(x_prev - x_curr, Inf));
         fprintf('2 norm diff of vectors: %e\n', norm(x_prev - x_curr, 2));
-        fprintf('Eps of largest element in x_prev: %e\n', eps(max(x_prev)));
+        fprintf('Eps of largest element in x_prev: %e\n', eps(max(x_prev, [], 'all')));
         fprintf('%f\n', norm(x_prev, 1));
 
         fprintf('\n');

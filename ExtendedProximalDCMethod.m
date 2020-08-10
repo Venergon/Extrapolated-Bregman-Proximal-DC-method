@@ -33,6 +33,7 @@ L = max_eigval;
 % remark 3.2 in https://arxiv.org/pdf/2003.04124.pdf
 % Choose alpha_max as close as possible to 1 without reaching 1
 alpha_max = 0.99;
+nu_prev = 1;
 nu_curr = 1;
 n0 = 10000;
 max_diff = 0;
@@ -56,8 +57,8 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr, itera
         nu_curr = (1 + sqrt(1 + 4*nu_prev^2))/2;
     end
     
-    alpha = alpha_max * (nu_prev - 1)/nu_curr;
-    %alpha = 0;
+    %alpha = alpha_max * (nu_prev - 1)/nu_curr;
+    alpha = 0;
     
     w = x_curr + alpha.*(x_curr - x_prev);
     
@@ -70,7 +71,7 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr, itera
     % L/2*||x - w_k||_2^2 + 1/t_k*D(x, x_k)
     
     % TODO: Currently got a static step size t_k = 1
-    t = 100;
+    t = 1;
     
     x_next = calculate_argmin(A, b, w, xi, L, t, x_curr, max_eigval);
    

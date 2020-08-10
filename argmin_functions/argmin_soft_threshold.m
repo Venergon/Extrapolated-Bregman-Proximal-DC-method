@@ -14,12 +14,10 @@ function [x] = argmin_soft_threshold(A, b, dD, w, xi, L, t, x_prev, lambda, max_
 % Represent \nabla f and \nabla h by df and dh respectively
 df = A'*(A*w - b);
 
-n = length(x_prev);
-
 %if norm(x_prev, 1) <= 826292734.775
 %    step_size = 0.9/(2*max_eigval*length(x_prev));
 %else
-    step_size = 0.9/(2*(L + 1/t));
+    step_size = 0.9/(2*(lambda + L + 1/t));
 %end
 %step_size = 1/100000;
 
@@ -27,21 +25,19 @@ dh = @(x) (df - xi + L.*(x-w) + (1/t).*dD(x, x_prev));
 
 x = x_prev;
 
-obj_fn = @(x) (lambda*norm(x, 1) + sum((df - xi).*(x-w)) + L/2*(norm(x-w, 2)^2) + (1/t) * (1/2) * (norm(x-x_prev, 2)^2));
+obj_fn = @(x) (lambda*norm(x, 1) + trace((df - xi)'*(x-w)) + L/2*(norm(x-w, 2)^2) + (1/t) * (1/2) * (norm(x-x_prev, 2)^2));
 
 
 for iteration = 1:thresholding_iterations
     inner_vector = x - step_size*dh(x);
 
-    for i=1:n
-        x(i) = sign(inner_vector(i))*max((abs(inner_vector(i)) - lambda*step_size), 0);
-    end
+    x = sign(inner_vector).*max((abs(inner_vector) - lambda*step_size), 0);
 end
 
 if obj_fn(x) > obj_fn(x_prev)
     %x = x_prev;
-    fprintf("Wat\n\n");
-    
+    fprintf("Error: SOFT THRESHOLDING ended with higher objective value\n\n");
+    %error('hello')
     %f = @(x) (lambda*abs(x) + (df(i) - xi)*(x-w(i)) + L/2*(x - w(i))^2 + 1/(2*t) * (x-x_prev(i))^2);
     %for i=1:n
     %    if f(x(i)) > f(x_prev(i))
