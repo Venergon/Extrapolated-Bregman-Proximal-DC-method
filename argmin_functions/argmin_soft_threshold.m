@@ -20,7 +20,7 @@ dh = @(x) (df - xi + L.*(x-w) + (1/t).*dD(x, x_prev));
 
 x = x_prev;
 
-obj_fn = @(x) (lambda*norm(x, 1) + trace((df - xi)'*(x-w)) + L/2*(norm(x-w, 'fro')^2) + (1/t) * (1/2) * (norm(x-x_prev, 'fro')^2));
+obj_fn = @(x) (lambda*sum(abs(x), 'all') + trace((df - xi)'*(x-w)) + L/2*(norm(x-w, 'fro')^2) + (1/t) * (1/2) * (norm(x-x_prev, 'fro')^2));
 
 
 for iteration = 1:thresholding_iterations
