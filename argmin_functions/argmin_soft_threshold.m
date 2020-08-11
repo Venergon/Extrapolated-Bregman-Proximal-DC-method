@@ -22,7 +22,6 @@ x = x_prev;
 
 obj_fn = @(x) (lambda*sum(abs(x), 'all') + trace((df - xi)'*(x-w)) + L/2*(norm(x-w, 'fro')^2) + (1/t) * (1/2) * (norm(x-x_prev, 'fro')^2));
 
-
 for iteration = 1:thresholding_iterations
     inner_vector = x - step_size*dh(x);
 
@@ -32,7 +31,6 @@ end
 if obj_fn(x) > obj_fn(x_prev)
     %x = x_prev;
     fprintf("Error: SOFT THRESHOLDING ended with higher objective value\n\n");
-    %error('hello')
     %f = @(x) (lambda*abs(x) + (df(i) - xi)*(x-w(i)) + L/2*(x - w(i))^2 + 1/(2*t) * (x-x_prev(i))^2);
     %for i=1:n
     %    if f(x(i)) > f(x_prev(i))

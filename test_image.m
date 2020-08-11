@@ -36,7 +36,7 @@ subplot(2, 2, 2);
 imshow(uint8(noisy_image));
 title(sprintf('Noisy Image, PSNR = %2.2f dB', psnr(uint8(noisy_image), uint8(image))));
 
-transformed_image = fft2(noisy_image);
+transformed_image = real(fft2(noisy_image));
 %transformed_image_vector_complex = reshape(transformed_image, height*width, 1);
 
 %image_vector = reshape(noisy_image, height*width, 1);
@@ -67,7 +67,7 @@ obj_fn_L1_L2 = @(x) (1/2*norm(A*x-b, 2)^2 + penalty_L1_L2(x, lambda));
 obj_fn_L1_half_L2 = @(x) (1/2*norm(A*x-b, 2)^2 + lambda *(norm(x, 1) - (1/2)*norm(x, 2)));
 obj_fn_L1_double_L2 = @(x) (1/2*norm(A*x-b, 2)^2 + lambda *(norm(x, 1) - 2*norm(x, 2)));
 
-obj_fn_L1 = @(x) (1/2*norm(A*x-b, 'fro')^2 + lambda*sum(x, 'all'));%penalty_L1(x, lambda));
+obj_fn_L1 = @(x) ((1/2)*norm(A*x-b, 'fro')^2 + lambda*sum(x, 'all'));%penalty_L1(x, lambda));
 obj_fn_MCP = @(x) (1/2*norm(A*x-b, 2)^2 + penalty_MCP(x, lambda, theta_MCP));
 obj_fn_SCAD = @(x) (1/2*norm(A*x-b, 2)^2 + penalty_SCAD(x, lambda, theta_SCAD));
 obj_fn_TL1 = @(x) (1/2*norm(A*x-b, 2)^2 + penalty_TL1(x, lambda, a));

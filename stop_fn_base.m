@@ -17,6 +17,8 @@ function [stop] = stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration)
         fprintf('%f\n', norm(x_prev, 1));
 
         fprintf('\n');
+        
+        %error('gf')
 
         %fprintf('Prev x %e, curr x %e diff %e\n', norm(x_prev, 2), norm(x_curr, 2), norm(x_prev - x_curr, 2));
         %throw(MException('TEST'));
