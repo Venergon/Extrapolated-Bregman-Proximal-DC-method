@@ -95,7 +95,7 @@ argmin_fn_arctan_lambda = get_argmin_function(lambda, 'arctan', 'L2', threshold_
 
 tic
 disp('Calculating solution to problem');
-x_approx = ExtendedProximalDCMethod(A, b, x0, dg_0, argmin_fn_soft_lambda, stop_fn_L1);
+x_approx = ExtendedProximalDCMethod(A, b, x0, dg_L2, argmin_fn_soft_lambda, stop_fn_L1_L2);
 t = toc
 
 %x_approx_combined = combine_complex(x_approx);
