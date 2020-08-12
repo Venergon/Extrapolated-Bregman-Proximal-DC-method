@@ -78,11 +78,6 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr, itera
     %% Shuffle x_prev, x_curr, x_next to represent moving to the next value of k
     x_prev = x_curr;
     x_curr = x_next;
-    
-    diff = norm(x_prev - x_curr);
-    if diff > max_diff
-        max_diff = diff;
-    end
 end
 
 x = x_curr;
