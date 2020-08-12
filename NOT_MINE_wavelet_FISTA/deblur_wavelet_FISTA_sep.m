@@ -122,7 +122,8 @@ for i=1:MAXITER
     
     %updating t and Y
     t_new=(1+sqrt(1+4*t_old^2))/2;
-    Y=X_iter+(t_old-1)/t_new*(X_iter-X_old);
+    Y=X_iter+(t_old-1)/t_new*(X_iter-X_old); %%%FISTA    
+    %Y=X_iter;   %%%ISTA 
     
     % Compute the l1 norm of the wavelet transform and the function value and store it in
     % the function values vector fun_all if exists.
