@@ -1,4 +1,4 @@
-function [P] = penalty_cauchy(x, lambda, gamma)
+function [P] = penalty_1D_cauchy(x, lambda, gamma)
     P = 0;
     
     for i=1:length(x)

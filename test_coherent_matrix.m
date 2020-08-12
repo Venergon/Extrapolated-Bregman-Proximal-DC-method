@@ -63,16 +63,16 @@ dg_TL1 = @(x) (sign(x).*((a+1)/(a)) - sign(x).*(a^2 + a)./((a + abs(x)).^2));
 dg_cauchy = @(x) lambda*2*x;
 dg_arctan = @(x) lambda*M_arctan*x;
 
-obj_fn_L1_L2 = @(x) (1/2*norm(A*x-b)^2 + lambda *(norm(x, 1) - norm(x, 2)));
-obj_fn_L1_half_L2 = @(x) (1/2*norm(A*x-b)^2 + lambda *(norm(x, 1) - (1/2)*norm(x, 2)));
-obj_fn_L1_double_L2 = @(x) (1/2*norm(A*x-b)^2 + lambda *(norm(x, 1) - 2*norm(x, 2)));
+obj_fn_L1_L2 = @(x) (objective_1D_L2(A, x, b) + penalty_1D_L1_L2(x, lambda, 1));
+obj_fn_L1_half_L2 = @(x) (objective_1D_L2(A, x, b) + penalty_1D_L1_L2(x, lambda, 1/2));
+obj_fn_L1_double_L2 = @(x) (objective_1D_L2(A, x, b) + penalty_1D_L1_L2(x, lambda, 2));
 
-obj_fn_L1 = @(x) (1/2*norm(A*x-b)^2 + lambda * norm(x, 1));
-obj_fn_MCP = @(x) (1/2*norm(A*x-b)^2 + penalty_MCP(x, lambda, theta_MCP));
-obj_fn_SCAD = @(x) (1/2*norm(A*x-b)^2 + penalty_SCAD(x, lambda, theta_SCAD));
-obj_fn_TL1 = @(x) (1/2*norm(A*x-b)^2 + penalty_TL1(x, lambda, a));
-obj_fn_cauchy = @(x) (1/2*norm(A*x-b)^2 + penalty_cauchy(x, lambda, gamma_cauchy));
-obj_fn_arctan = @(x) (1/2*norm(A*x-b)^2 + penalty_arctan(x, lambda, alpha_arctan, beta_arctan, gamma_arctan));
+obj_fn_L1 = @(x) (objective_1D_L2(A, x, b) + penalty_1D_L1(x, lambda));
+obj_fn_MCP = @(x) (objective_1D_L2(A, x, b) + penalty_1D_MCP(x, lambda, theta_MCP));
+obj_fn_SCAD = @(x) (objective_1D_L2(A, x, b) + penalty_1D_SCAD(x, lambda, theta_SCAD));
+obj_fn_TL1 = @(x) (objective_1D_L2(A, x, b) + penalty_1D_TL1(x, lambda, a));
+obj_fn_cauchy = @(x) (objective_1D_L2(A, x, b) + penalty_1D_cauchy(x, lambda, gamma_cauchy));
+obj_fn_arctan = @(x) (objective_1D_L2(A, x, b) + penalty_1D_arctan(x, lambda, alpha_arctan, beta_arctan, gamma_arctan));
 
 stop_fn = @(obj_fn)  (@(x_prev, x_curr, iteration)(stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration)));
 

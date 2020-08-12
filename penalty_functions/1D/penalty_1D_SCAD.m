@@ -1,4 +1,4 @@
-function [P] = penalty_SCAD(x, lambda, theta)
+function [P] = penalty_1D_SCAD(x, lambda, theta)
     % Version of the SCAD penalty from https://myweb.uiowa.edu/pbreheny/7600/s16/notes/2-29.pdf
     P = 0;
 

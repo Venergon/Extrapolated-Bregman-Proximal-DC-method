@@ -1,4 +1,4 @@
-function [P] = penalty_arctan(x, lambda, alpha, beta, gamma)
+function [P] = penalty_1D_arctan(x, lambda, alpha, beta, gamma)
     P = 0;
     
     for i=1:length(x)

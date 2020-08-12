@@ -1,4 +1,4 @@
-function [P] = penalty_MCP(x, lambda, theta)
+function [P] = penalty_1D_MCP(x, lambda, theta)
     % Version of the MCP penalty from https://myweb.uiowa.edu/pbreheny/7600/s16/notes/2-29.pdf
     P = 0;
 

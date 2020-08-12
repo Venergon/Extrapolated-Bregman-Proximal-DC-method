@@ -31,7 +31,7 @@ dg = @(x) lambda*2*x;
 
 
 gamma = 0.001;
-obj_fn = @(x) (1/2*norm(A*x-b, 2)^2 + penalty_cauchy(x, lambda, gamma));
+obj_fn = @(x) (objective_1D_L2(A, x, b) + penalty_1D_cauchy(x, lambda, gamma));
 
 stop_fn = @(x_prev, x_curr, iteration) (stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration));
 
