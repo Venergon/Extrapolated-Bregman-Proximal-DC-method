@@ -10,7 +10,7 @@ theta_MCP = 5;
 theta_SCAD = 5;
 a = 1;
 gamma_cauchy = 2;
-lambda = 300;
+lambda = 2000;
 
 beta_arctan = sqrt(3)/3;
 gamma_arctan = pi/6;
@@ -36,7 +36,7 @@ subplot(2, 2, 2);
 imshow(uint8(noisy_image));
 title(sprintf('Noisy Image, PSNR = %2.2f dB', psnr(uint8(noisy_image), uint8(image))));
 
-transformed_image = dct2(noisy_image);
+transformed_image = fft2(noisy_image);
 %transformed_image_vector_complex = reshape(transformed_image, height*width, 1);
 
 %image_vector = reshape(noisy_image, height*width, 1);
@@ -101,7 +101,7 @@ t = toc
 %x_approx_combined = combine_complex(x_approx);
 
 %x_approx_reshaped = reshape(x_approx_combined, height, width);
-image_approx = idct2(x_approx);
+image_approx = ifft2(x_approx);
 %x_untransformed = ifft(x_approx_combined);
 %image_approx = reshape(x_untransformed, height, width);
 

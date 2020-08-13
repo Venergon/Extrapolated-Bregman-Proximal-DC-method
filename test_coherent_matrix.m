@@ -109,20 +109,6 @@ x_L1_L2 = ExtendedProximalDCMethod(A, b, x0, dg_L2, argmin_fn_soft_lambda, stop_
 b_L1_L2 = A*x_L1_L2;
 t_L1_L2 = toc
 
-x_least_squares = A \ b;
-b_least_squares = A*x_least_squares;
-
-obj_hat = obj_fn_L1_L2(x_hat);
-obj_L1_L2 = obj_fn_L1_L2(x_L1_L2);
-obj_least_squares = obj_fn_L1_L2(x_least_squares);
-
-b_diff_L1_L2 = norm(b_L1_L2 - b, 2)/norm(b, 2);
-b_diff_hat = norm(b_hat - b, 2)/norm(b, 2);
-b_diff_least_squares = norm(b_least_squares - b, 2)/norm(b, 2);
-
-x_diff_L1_L2 = norm(x_L1_L2 - x_hat, 2)/norm(x_hat, 2);
-x_diff_least_squares = norm(x_least_squares - x_hat, 2)/norm(x_hat, 2);
-
 tic
 disp('Calculating solution to L1 problem');
 x_L1 = ExtendedProximalDCMethod(A, b, x0, dg_0, argmin_fn_soft_lambda, stop_fn_L1);
@@ -187,6 +173,19 @@ dense_cauchy = nnz(truncate(x_cauchy, threshold));
 dense_arctan = nnz(truncate(x_arctan, threshold));
 dense_L1_half_L2 = nnz(truncate(x_L1_half_L2, threshold));
 dense_L1_double_L2 = nnz(truncate(x_L1_double_L2, threshold));
+
+diff_x_hat = norm(x_hat - x_hat, 2);
+diff_L1_L2 = norm(x_L1_L2 - x_hat, 2);
+diff_L1 = norm(x_L1 - x_hat, 2);
+diff_MCP = norm(x_MCP - x_hat, 2);
+diff_SCAD = norm(x_SCAD - x_hat, 2);
+diff_TL1 = norm(x_TL1 - x_hat, 2);
+diff_cauchy = norm(x_cauchy - x_hat, 2);
+diff_arctan = norm(x_arctan - x_hat, 2);
+diff_L1_half_L2 = norm(x_L1_half_L2 - x_hat, 2);
+diff_L1_double_L2 = norm(x_L1_double_L2 - x_hat, 2);
+
+
 
 
 function [dg] = dg_2_norm(x) 
