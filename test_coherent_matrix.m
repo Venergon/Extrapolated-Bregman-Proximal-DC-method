@@ -1,6 +1,6 @@
 % Test ExtendedProximalDCMethod using a highly coherent randomly generated matrix of size
 % nXm, with some gaussian noise
-rtol = 1e-4;
+rtol = 1e-6;
 lambda = 10;
 n = 2048;
 m = 1024;
@@ -57,7 +57,7 @@ dg_0 = @(x) (0);
 % https://link.springer.com/article/10.1007/s10589-017-9954-1
 % All three use the L1 norm as the positive convex part
 dg_MCP = @(x) (lambda.*sign(x).*min(1, abs(x)/(theta_MCP*lambda)));
-dg_SCAD = @(x) (sign(x).*(min(theta_SCAD*lambda, abs(x)) - lambda)/(theta_SCAD - 1));
+dg_SCAD = @(x) (sign(x).*(max(min(theta_SCAD*lambda, abs(x)) - lambda, 0))/(theta_SCAD - 1));
 dg_TL1 = @(x) (sign(x).*((a+1)/(a)) - sign(x).*(a^2 + a)./((a + abs(x)).^2));
 
 dg_cauchy = @(x) lambda*2*x;
@@ -74,7 +74,7 @@ obj_fn_TL1 = @(x) (objective_1D_L2(A, x, b) + penalty_1D_TL1(x, lambda, a));
 obj_fn_cauchy = @(x) (objective_1D_L2(A, x, b) + penalty_1D_cauchy(x, lambda, gamma_cauchy));
 obj_fn_arctan = @(x) (objective_1D_L2(A, x, b) + penalty_1D_arctan(x, lambda, alpha_arctan, beta_arctan, gamma_arctan));
 
-stop_fn = @(obj_fn)  (@(x_prev, x_curr, iteration)(stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration)));
+stop_fn = @(obj_fn)  (@(x_prev, x_curr, iteration)(stop_fn_base(obj_fn, rtol, x0, x_prev, x_curr, iteration)));
 
 stop_fn_L1_L2 = stop_fn(obj_fn_L1_L2);
 stop_fn_L1_half_L2 = stop_fn(obj_fn_L1_half_L2);
@@ -104,15 +104,25 @@ x_cauchy = ExtendedProximalDCMethod(A, b, x0, dg_cauchy, argmin_fn_cauchy_lambda
 t_cauchy = toc
 
 tic
+disp('Calculating solution to L1 problem');
+x_L1 = ExtendedProximalDCMethod(A, b, x0, dg_0, argmin_fn_soft_lambda, stop_fn_L1);
+t_L1 = toc
+
+tic
+disp('Calculating solution to L1-2*L2 problem');
+x_L1_double_L2 = ExtendedProximalDCMethod(A, b, x0, dg_double_L2, argmin_fn_soft_lambda, stop_fn_L1_double_L2);
+t_L1_double_L2 = toc
+
+tic
+disp('Calculating solution to L1-1/2*L2 problem');
+x_L1_half_L2 = ExtendedProximalDCMethod(A, b, x0, dg_half_L2, argmin_fn_soft_lambda, stop_fn_L1_half_L2);
+t_L1_half_L2 = toc
+
+tic
 disp('Calculating solution to L1-L2 problem');
 x_L1_L2 = ExtendedProximalDCMethod(A, b, x0, dg_L2, argmin_fn_soft_lambda, stop_fn_L1_L2);
 b_L1_L2 = A*x_L1_L2;
 t_L1_L2 = toc
-
-tic
-disp('Calculating solution to L1 problem');
-x_L1 = ExtendedProximalDCMethod(A, b, x0, dg_0, argmin_fn_soft_lambda, stop_fn_L1);
-t_L1 = toc
 
 tic
 disp('Calculating solution to MCP problem');
@@ -128,16 +138,6 @@ tic
 disp('Calculating solution to TL1 problem');
 x_TL1 = ExtendedProximalDCMethod(A, b, x0, dg_TL1, argmin_fn_soft_TL1, stop_fn_TL1);
 t_TL1 = toc
-
-tic
-disp('Calculating solution to L1-1/2*L2 problem');
-x_L1_half_L2 = ExtendedProximalDCMethod(A, b, x0, dg_half_L2, argmin_fn_soft_lambda, stop_fn_L1_half_L2);
-t_L1_half_L2 = toc
-
-tic
-disp('Calculating solution to L1-2*L2 problem');
-x_L1_double_L2 = ExtendedProximalDCMethod(A, b, x0, dg_double_L2, argmin_fn_soft_lambda, stop_fn_L1_double_L2);
-t_L1_double_L2 = toc
 
 
 % Truncate all elements below this threshold
@@ -164,6 +164,7 @@ hold off;
 
 
 dense_x_hat = nnz(truncate(x_hat, threshold));
+dense_x0 = nnz(truncate(x0, threshold));
 dense_L1_L2 = nnz(truncate(x_L1_L2, threshold));
 dense_L1 = nnz(truncate(x_L1, threshold));
 dense_MCP = nnz(truncate(x_MCP, threshold));
@@ -175,6 +176,7 @@ dense_L1_half_L2 = nnz(truncate(x_L1_half_L2, threshold));
 dense_L1_double_L2 = nnz(truncate(x_L1_double_L2, threshold));
 
 diff_x_hat = norm(x_hat - x_hat, 2);
+diff_x0 = norm(x0 - x_hat, 2);
 diff_L1_L2 = norm(x_L1_L2 - x_hat, 2);
 diff_L1 = norm(x_L1 - x_hat, 2);
 diff_MCP = norm(x_MCP - x_hat, 2);
