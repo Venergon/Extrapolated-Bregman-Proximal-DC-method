@@ -32,8 +32,8 @@ x0 = A \ b;
 dg = @(x) lambda*2*x;
 
 
-gamma = 0.001;
-obj_fn = @(x) (objective_1D_L2(A, x, b) + penalty_1D_cauchy(x, lambda, gamma));
+gamma = 1;
+obj_fn = @(x) (f(x) + penalty_1D_cauchy(x, lambda, gamma));
 
 stop_fn = @(x_prev, x_curr, iteration) (stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration));
 
@@ -42,7 +42,7 @@ obj_fn(x_hat)
 
 disp('Starting Extended Bregman Proximal DC Method');
 tic
-thresh = get_argmin_function(lambda, 'cauchy', 'L2', threshold_iterations, 0, 0, gamma_cauchy);
+thresh = get_argmin_function(lambda, 'cauchy', 'L2', threshold_iterations, 0, 0, gamma);
 x_bregman = ExtendedProximalDCMethod(f, df, L, x0, dg, thresh, stop_fn);
 time_bregman = toc
 disp('Finished Extended Bregman Proximal DC Method');

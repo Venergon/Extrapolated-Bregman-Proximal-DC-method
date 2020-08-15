@@ -52,7 +52,7 @@ dg_arctan = @(x) lambda*M_arctan*x;
 
 
 dg = dg_cauchy;
-obj_fn = @(x) (objective_1D_L2(A, x, b) + penalty_1D_cauchy(x, lambda, gamma_cauchy));
+obj_fn = @(x) (f(x) + penalty_1D_cauchy(x, lambda, gamma_cauchy));
 
 stop_fn = @(x_prev, x_curr, iteration)(obj_fn(x_curr) < obj_fn(x_prev) && obj_fn(x_prev) - obj_fn(x_curr) < tol);
 
