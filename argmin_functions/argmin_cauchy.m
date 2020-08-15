@@ -1,4 +1,4 @@
-function [x] = argmin_cauchy(A, b, dD, w, xi, L, t, x_prev, lambda, max_eigval, thresholding_iterations, gamma)
+function [x] = argmin_cauchy(df, dD, w, xi, L, t, x_prev, lambda, thresholding_iterations, gamma)
 % Finds argmin {lambda*g(x) + <df(w) - xi, x-w> + L/2*||x-w||_2^2 + 1/t*D(x,
 % x_prev)
 % Where g(x) is the modified cauchy priory g(x) = -sum(log(gamma/(x_i^2 +
@@ -11,7 +11,7 @@ function [x] = argmin_cauchy(A, b, dD, w, xi, L, t, x_prev, lambda, max_eigval, 
 
 % TODO: For now we're assuming D(x, x_prev) = 1/2*||x||_2^2, as with other distance formulas we don't necessarily get a polynomial, 
 % will need to make a case for each distance function
-df = A'*(A*w - b);
+df_w = df(w);
 
 M = 2;
 
@@ -20,9 +20,9 @@ x = x_prev;
 % Formulate it as ax^3 + bx^2 + cx + d
 % Start with everything but the parts relying on D
 a = (lambda*M + L)*ones(size(x));
-b = df - xi - L*w;
+b = df_w - xi - L*w;
 c = (2*lambda*gamma + lambda*M*gamma + gamma*L)*ones(size(x));
-d = gamma*df - xi*gamma - gamma*L*w;
+d = gamma*df_w - xi*gamma - gamma*L*w;
 
 % Add the terms based on D
 % Those being x^2/(2t) *(d/dx D) + gamma/(2t)*(d/dx D)

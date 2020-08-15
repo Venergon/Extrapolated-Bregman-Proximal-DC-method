@@ -1,11 +1,12 @@
-function [x] = ExtendedProximalDCMethod(A, b, x0, dg_2, calculate_argmin, stop_fn)
+function [x] = ExtendedProximalDCMethod(f, df, L, x0, dg_2, calculate_argmin, stop_fn)
 % Extended Proximal DC Method: Find an approximation to the minimum of
-% 1/2*|Ax-b|^2 + lambda*(g_1(x) - g_2(x))
+% f(x) + lambda*(g_1(x) - g_2(x))
 % using the Extended Proximal DC method
 % 
 % Inputs:
-%  A : matrix used for the minimization of |Ax-b|
-%  b : desired result vector, used in the minimization of |Ax - b|
+%  f : the objective function
+%  df : the gradient of the objective function
+%  L : the lipschitz constant for the gradient of the objective function
 %  x0 : initial guess for x
 %  dg_2(x) : a function that returns a member of the subderivative of g_2 at x 
 %  calculate_argmin(A, b, w, xi, L, t, x_curr, max_eigval) : the
@@ -23,11 +24,6 @@ function [x] = ExtendedProximalDCMethod(A, b, x0, dg_2, calculate_argmin, stop_f
 % x_prev = x_{k-1} (x_{-1}, initialised with x0)
 x_curr = x0;
 x_prev = x_curr;
-
-max_eigval = abs(eigs(A'*A, 1));
-
-% Calculate L as a lipschitz constant for the gradient of 1/2*|Ax - b|^2
-L = max_eigval;
 
 % Set the parameters for the extapolation parameter, based on the method to pick kappa in 
 % remark 3.2 in https://arxiv.org/pdf/2003.04124.pdf
@@ -73,7 +69,7 @@ while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr, itera
     % TODO: Currently got a static step size t_k = 1
     t = 1;
     
-    x_next = calculate_argmin(A, b, w, xi, L, t, x_curr, max_eigval);
+    x_next = calculate_argmin(df, w, xi, L, t, x_curr);
    
     %% Shuffle x_prev, x_curr, x_next to represent moving to the next value of k
     x_prev = x_curr;

@@ -25,6 +25,8 @@ b_hat = A*x_hat;
 noise = normrnd(noise_mu, noise_sigma, n, 1);
 b = b_hat + noise;
 
+[f, df, L] = get_objective_function('1D-L2', A, b);
+
 x0 = A \ b;
 
 dg = @(x) lambda*2*x;
@@ -40,8 +42,8 @@ obj_fn(x_hat)
 
 disp('Starting Extended Bregman Proximal DC Method');
 tic
-thresh = get_argmin_function(lambda, 'cauchy', 'L2', threshold_iterations);
-x_bregman = ExtendedProximalDCMethod(A, b, x0, dg, thresh, stop_fn);
+thresh = get_argmin_function(lambda, 'cauchy', 'L2', threshold_iterations, 0, 0, gamma_cauchy);
+x_bregman = ExtendedProximalDCMethod(f, df, L, x0, dg, thresh, stop_fn);
 time_bregman = toc
 disp('Finished Extended Bregman Proximal DC Method');
 obj_fn(x0)

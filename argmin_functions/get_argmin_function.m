@@ -1,4 +1,4 @@
-function [f] = get_argmin_function(lambda, penalty_type, distance_type, iterations)
+function [f] = get_argmin_function(lambda, penalty_type, distance_type, iterations, alpha, beta, gamma)
 % Returns a function to calculate the argmin{lambda*g_1(x) + <df(w_k) - xi, x-w_k>
 % + L/2 ||x - w_k||_2^2 + 1/t*D_h(x, x^k)
 
@@ -36,15 +36,15 @@ end
 
 switch penalty_type
     case 'L1'
-        f = @(A, b, w, xi, L, t, x_prev, max_eigval) argmin_soft_threshold(A, b, dD, w, xi, L, t, x_prev, lambda, max_eigval, iterations);
+        f = @(df, w, xi, L, t, x_prev) argmin_soft_threshold(df, dD, w, xi, L, t, x_prev, lambda, iterations);
     case 'cauchy'
-        gamma = 2;
-        f = @(A, b, w, xi, L, t, x_prev, max_eigval) argmin_cauchy(A, b, dD, w, xi, L, t, x_prev, lambda, max_eigval, iterations, gamma);
+        %gamma = 2;
+        f = @(df, w, xi, L, t, x_prev) argmin_cauchy(df, dD, w, xi, L, t, x_prev, lambda, iterations, gamma);
     case 'arctan'
-        beta = sqrt(3)/3;
-        gamma = pi/6;
-        alpha = 1;
-        f = @(A, b, w, xi, L, t, x_prev, max_eigval) argmin_arctan(A, b, dD, w, xi, L, t, x_prev, lambda, max_eigval, iterations, alpha, beta, gamma);
+        %beta = sqrt(3)/3;
+        %gamma = pi/6;
+        %alpha = 1;
+        f = @(df, w, xi, L, t, x_prev) argmin_arctan(df, dD, w, xi, L, t, x_prev, lambda, iterations, alpha, beta, gamma);
     otherwise
         disp('Please select a valid penalty type from the following: ["L1", "cauchy"]')
 

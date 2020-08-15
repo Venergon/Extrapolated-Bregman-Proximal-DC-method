@@ -29,6 +29,8 @@ b_hat = A*x_hat;
 noise = normrnd(noise_mu, noise_sigma, n, 1);
 b = b_hat + noise;
 
+[f, df, L] = get_objective_function('1D-L2', A, b);
+
 x0 = A \ b;
 % g = ||x||_2, so dg = 
 
@@ -74,22 +76,22 @@ stop_fn_arctan = stop_fn(obj_fn_arctan);
 
 argmin_fn_soft_lambda = get_argmin_function(lambda, 'L1', 'L2', threshold_iterations);
 argmin_fn_soft_TL1 = get_argmin_function((a+1)/a, 'L1', 'L2', threshold_iterations);
-argmin_fn_cauchy_lambda = get_argmin_function(lambda, 'cauchy', 'L2', threshold_iterations);
-argmin_fn_arctan_lambda = get_argmin_function(lambda, 'arctan', 'L2', threshold_iterations);
+argmin_fn_cauchy_lambda = get_argmin_function(lambda, 'cauchy', 'L2', threshold_iterations, 0, 0, gamma_cauchy);
+argmin_fn_arctan_lambda = get_argmin_function(lambda, 'arctan', 'L2', threshold_iterations, alpha_arctan, beta_arctan, gamma_arctan);
 
 tic
 disp('Calculating solution to arctan problem');
-x_arctan = ExtendedProximalDCMethod(A, b, x0, dg_arctan, argmin_fn_arctan_lambda, stop_fn_arctan);
+x_arctan = ExtendedProximalDCMethod(f, df, L, x0, dg_arctan, argmin_fn_arctan_lambda, stop_fn_arctan);
 t_arctan = toc
 
 tic
 disp('Calculating solution to cauchy priory problem');
-x_cauchy = ExtendedProximalDCMethod(A, b, x0, dg_cauchy, argmin_fn_cauchy_lambda, stop_fn_cauchy);
+x_cauchy = ExtendedProximalDCMethod(f, df, L, x0, dg_cauchy, argmin_fn_cauchy_lambda, stop_fn_cauchy);
 t_cauchy = toc
 
 tic
 disp('Calculating solution to L1-L2 problem');
-x_L1_L2 = ExtendedProximalDCMethod(A, b, x0, dg_L2, argmin_fn_soft_lambda, stop_fn_L1_L2);
+x_L1_L2 = ExtendedProximalDCMethod(f, df, L, x0, dg_L2, argmin_fn_soft_lambda, stop_fn_L1_L2);
 b_L1_L2 = A*x_L1_L2;
 t_L1_L2 = toc
 
@@ -109,32 +111,32 @@ x_diff_least_squares = norm(x_least_squares - x_hat, 2)/norm(x_hat, 2);
 
 tic
 disp('Calculating solution to L1 problem');
-x_L1 = ExtendedProximalDCMethod(A, b, x0, dg_0, argmin_fn_soft_lambda, stop_fn_L1);
+x_L1 = ExtendedProximalDCMethod(f, df, L, x0, dg_0, argmin_fn_soft_lambda, stop_fn_L1);
 t_L1 = toc
 
 tic
 disp('Calculating solution to MCP problem');
-x_MCP = ExtendedProximalDCMethod(A, b, x0, dg_MCP, argmin_fn_soft_lambda, stop_fn_MCP);
+x_MCP = ExtendedProximalDCMethod(f, df, L, x0, dg_MCP, argmin_fn_soft_lambda, stop_fn_MCP);
 t_MCP = toc
 
 tic
 disp('Calculating solution to SCAD problem');
-x_SCAD = ExtendedProximalDCMethod(A, b, x0, dg_SCAD, argmin_fn_soft_lambda, stop_fn_SCAD);
+x_SCAD = ExtendedProximalDCMethod(f, df, L, x0, dg_SCAD, argmin_fn_soft_lambda, stop_fn_SCAD);
 t_SCAD = toc
 
 tic
 disp('Calculating solution to TL1 problem');
-x_TL1 = ExtendedProximalDCMethod(A, b, x0, dg_TL1, argmin_fn_soft_TL1, stop_fn_TL1);
+x_TL1 = ExtendedProximalDCMethod(f, df, L, x0, dg_TL1, argmin_fn_soft_TL1, stop_fn_TL1);
 t_TL1 = toc
 
 tic
 disp('Calculating solution to L1-1/2*L2 problem');
-x_L1_half_L2 = ExtendedProximalDCMethod(A, b, x0, dg_half_L2, argmin_fn_soft_lambda, stop_fn_L1_half_L2);
+x_L1_half_L2 = ExtendedProximalDCMethod(f, df, L, x0, dg_half_L2, argmin_fn_soft_lambda, stop_fn_L1_half_L2);
 t_L1_half_L2 = toc
 
 tic
 disp('Calculating solution to L1-2*L2 problem');
-x_L1_double_L2 = ExtendedProximalDCMethod(A, b, x0, dg_half_L2, argmin_fn_soft_lambda, stop_fn_L1_double_L2);
+x_L1_double_L2 = ExtendedProximalDCMethod(f, df, L, x0, dg_half_L2, argmin_fn_soft_lambda, stop_fn_L1_double_L2);
 t_L1_double_L2 = toc
 
 

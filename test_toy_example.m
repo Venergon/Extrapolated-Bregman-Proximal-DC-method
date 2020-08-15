@@ -20,6 +20,7 @@ A = [1, -1, 0, 0, 0, 0;
 x_ideal = [0; 0; 0; 20; 40; -18];
 b = A*x_ideal;
 
+[f, df, L] = get_objective_function('1D-L2', A, b);
 
 % Because there's no noise, the least squares solution will give an exact
 % solution to the ||Ax - b|| = 0 but not necessarily the solution to the
@@ -57,8 +58,8 @@ stop_fn = @(x_prev, x_curr, iteration)(obj_fn(x_curr) < obj_fn(x_prev) && obj_fn
 
 
 threshold_iterations = 10;
-argmin_function = get_argmin_function(lambda, 'cauchy', 'L2', threshold_iterations);
-x_approx = ExtendedProximalDCMethod(A, b, x0, dg, argmin_function, stop_fn);
+argmin_function = get_argmin_function(lambda, 'cauchy', 'L2', threshold_iterations, 0, 0, gamma_cauchy);
+x_approx = ExtendedProximalDCMethod(f, df, L, x0, dg, argmin_function, stop_fn);
 b_approx = A*x_approx;
 
 obj_ideal = obj_fn(x_ideal);

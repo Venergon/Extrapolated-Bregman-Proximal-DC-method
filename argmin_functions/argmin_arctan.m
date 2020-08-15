@@ -1,4 +1,4 @@
-function [x] = argmin_arctan(A, b, dD, w, xi, L, t, x_prev, lambda, max_eigval, thresholding_iterations, alpha, beta, gamma)
+function [x] = argmin_arctan(df, dD, w, xi, L, t, x_prev, lambda, thresholding_iterations, alpha, beta, gamma)
 % Finds argmin {lambda*g(x) + <df(w) - xi, x-w> + L/2*||x-w||_2^2 + 1/t*D(x,
 % x_prev)
 % Where g(x) is the arctan penalty g(x) = sum(arctan(1+alpha*|t|)/beta) - arctan(1/beta)) + M*||x||_2^2 (the second term ensuring that the equation is
@@ -15,7 +15,7 @@ function [x] = argmin_arctan(A, b, dD, w, xi, L, t, x_prev, lambda, max_eigval, 
 
 % TODO: For now we're assuming D(x, x_prev) = 1/2*||x||_2^2, as with other distance formulas we don't necessarily get a polynomial, 
 % will need to make a case for each distance function
-df = A'*(A*w - b);
+df_w = df(w);
 
 M = (2*alpha^2*beta)/(gamma*(1+beta^2));
 
@@ -35,14 +35,14 @@ a = (M*lambda*alpha^2 + L*alpha^2).*ones(size(x_prev));
 a_pos = a;
 a_neg = a;
 
-b_pos = ones(size(x_prev)).*(2*alpha*M*lambda + alpha^2*df - xi*alpha^2 + 2*L*alpha - L*alpha^2*w);
-b_neg = ones(size(x_prev)).*(-2*alpha*M*lambda + alpha^2*df - xi*alpha^2 - 2*L*alpha - L*alpha^2*w);
+b_pos = ones(size(x_prev)).*(2*alpha*M*lambda + alpha^2*df_w - xi*alpha^2 + 2*L*alpha - L*alpha^2*w);
+b_neg = ones(size(x_prev)).*(-2*alpha*M*lambda + alpha^2*df_w - xi*alpha^2 - 2*L*alpha - L*alpha^2*w);
 
-c_pos = ones(size(x_prev)).*(beta^2*M*lambda + M*lambda + 2*alpha*df - 2*xi*alpha + L*beta^2 + L - 2*L*alpha*w);
-c_neg = ones(size(x_prev)).*(beta^2*M*lambda + M*lambda - 2*alpha*df + 2*xi*alpha + L*beta^2 + L + 2*L*alpha*w);
+c_pos = ones(size(x_prev)).*(beta^2*M*lambda + M*lambda + 2*alpha*df_w - 2*xi*alpha + L*beta^2 + L - 2*L*alpha*w);
+c_neg = ones(size(x_prev)).*(beta^2*M*lambda + M*lambda - 2*alpha*df_w + 2*xi*alpha + L*beta^2 + L + 2*L*alpha*w);
 
-d_pos = ones(size(x_prev)).*(beta^2*df + df - beta^2*xi - xi - L*beta^2*w - L*w + alpha*beta*lambda/gamma);
-d_neg = ones(size(x_prev)).*(beta^2*df + df - beta^2*xi - xi - L*beta^2*w - L*w - alpha*beta*lambda/gamma);
+d_pos = ones(size(x_prev)).*(beta^2*df_w + df_w - beta^2*xi - xi - L*beta^2*w - L*w + alpha*beta*lambda/gamma);
+d_neg = ones(size(x_prev)).*(beta^2*df_w + df_w - beta^2*xi - xi - L*beta^2*w - L*w - alpha*beta*lambda/gamma);
 
 % Add the terms based on D
 % TODO: Currently assume using 1/2*||x-x_prev||_2^2
@@ -83,7 +83,7 @@ for i=1:n
         min_point = 0;
         for j=1:length(possible_minima)
             curr_point = possible_minima(j);
-            curr_value = penalty_arctan(curr_point, lambda, alpha, beta, gamma) + lambda*M/2*curr_point^2 + (df(i)-xi(i))*(curr_point-w(i)) + L/2*(curr_point - w(i))^2 + 1/(2*t)*(curr_point-x_prev(i))^2;
+            curr_value = penalty_arctan(curr_point, lambda, alpha, beta, gamma) + lambda*M/2*curr_point^2 + (df_w(i)-xi(i))*(curr_point-w(i)) + L/2*(curr_point - w(i))^2 + 1/(2*t)*(curr_point-x_prev(i))^2;
 
             %curr_value
             if curr_value < min_value
