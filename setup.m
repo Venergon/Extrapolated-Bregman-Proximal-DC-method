@@ -8,3 +8,6 @@ addpath('penalty_functions/2D');
 addpath('objective_functions');
 addpath('objective_functions/1D');
 addpath('objective_functions/2D');
+
+addpath('OTHER_FISTA');
+addpath('OTHER_HNO');
