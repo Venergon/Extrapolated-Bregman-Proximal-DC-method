@@ -23,11 +23,11 @@ L = 1;
 x_hat = Bobs;
 x0 = Bobs;
 
-obj_fn_L1 = @(x) (f(x) + penalty_2D_abs(x, lambda));
-
 lambda = 2e-5;
-threshold_iterations = 10;
+threshold_iterations = 100;
 rtol = 1e-4;
+
+obj_fn_L1 = @(x) (f(x) + penalty_2D_abs(x, lambda));
 
 stop_fn = @(obj_fn)  (@(x_prev, x_curr, iteration)(stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration)));
 
@@ -47,3 +47,23 @@ t = toc
 subplot(2,2,3);
 imshow(x_approx,[]);
 title('Recovered Image');
+
+options.ti = 0;
+Jmin = 4;
+%w= @(f) perform_wavelet_transf(f,Jmin,+1,options);
+%wi= @(f) perform_wavelet_transf(f,Jmin,-1,options);
+w = @(f) f;
+wi = @(f) f;
+
+Gpic = @(x)  sum(sum(abs(w(x))));
+prox_gpic = @(x,a) wi(prox_l1(w(x),a));
+
+clear par;
+par.max_iter = 126;
+x_pg=prox_gradient(@(x)fpic(x),@(x) grad_fpic(x), @(x) Gpic(x), @(x,alpha)prox_gpic(x,alpha),lambda,x0,par);
+
+subplot(2, 2, 4);
+imshow(x_pg, []);
+title('proximal gradient');
+
+diff = norm(x_pg - x_approx)

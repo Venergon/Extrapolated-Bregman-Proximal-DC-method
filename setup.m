@@ -11,3 +11,9 @@ addpath('objective_functions/2D');
 
 addpath('OTHER_FISTA');
 addpath('OTHER_HNO');
+addpath('OTHER_FISTA/OTHER_numerical_tour/numerical-tour/toolbox_signal');
+addpath('OTHER_FISTA/OTHER_numerical_tour/numerical-tour/toolbox_general');
+
+
+addpath('OTHER_fom/pg software');
+addpath('OTHER_fom/prox functions');
