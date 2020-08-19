@@ -1,8 +1,8 @@
-function [f, df, L] = get_objective_function(objective_type, A, b)
+function [f, df, L] = get_objective_function(objective_type, A, b, P)
 % Gets the objective function, derivative and lipschitz constant of df
 % Inputs:
 %   objective_type: the type of objective function used. Can be any of
-%       ['1D-L2', '2D-fro']
+%       ['1D-L2', '2D-fro', '2D-filter']
 %   A: The matrix, for matrix based objective functions
 %   b: The desired result of applying the matrix to the current value, for
 %       matrix based objective functions
@@ -18,6 +18,11 @@ switch objective_type
         f = @(x) objective_2D_frobenius(A, x, b);
         df = @(x) objective_derivative_2D_frobenius(A, x, b);
         L = objective_lipschitz_2D_frobenius(A, b);
+        
+    case '2D-filter'
+        f = @(x) objective_2D_image_filter(x, b, P);
+        df = @(x) objective_derivative_2D_image_filter(x, b, P);
+        L = objective_lipschitz_2D_image_filter(b, P);
         
     otherwise
         error("Objective function must be one of ['1D-L2', '2D-fro']");
