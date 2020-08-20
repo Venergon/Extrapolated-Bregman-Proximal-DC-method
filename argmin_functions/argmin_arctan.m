@@ -76,14 +76,14 @@ for i=1:n
     if length(possible_minima) == 1
         x(i) = possible_minima(1);
     elseif length(possible_minima) > 1
-        fprintf('Warning: Got multiple results for solving the cauchy cubic\n');
+        fprintf('Warning: Got multiple results for solving the arctan cubic\n');
         possible_minima
         
         min_value = Inf;
         min_point = 0;
         for j=1:length(possible_minima)
             curr_point = possible_minima(j);
-            curr_value = penalty_arctan(curr_point, lambda, alpha, beta, gamma) + lambda*M/2*curr_point^2 + (df_w(i)-xi(i))*(curr_point-w(i)) + L/2*(curr_point - w(i))^2 + 1/(2*t)*(curr_point-x_prev(i))^2;
+            curr_value = penalty_2D_arctan(curr_point, lambda, alpha, beta, gamma) + lambda*M/2*curr_point^2 + (df_w(i)-xi(i))*(curr_point-w(i)) + L/2*(curr_point - w(i))^2 + 1/(2*t)*(curr_point-x_prev(i))^2;
 
             %curr_value
             if curr_value < min_value
