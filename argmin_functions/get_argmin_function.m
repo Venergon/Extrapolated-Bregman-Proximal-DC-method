@@ -1,4 +1,4 @@
-function [f] = get_argmin_function(lambda, penalty_type, distance_type, iterations, alpha, beta, gamma)
+function [f] = get_argmin_function(lambda, penalty_type, distance_type, iterations, alpha, beta, gamma, transform, itransform)
 % Returns a function to calculate the argmin{lambda*g_1(x) + <df(w_k) - xi, x-w_k>
 % + L/2 ||x - w_k||_2^2 + 1/t*D_h(x, x^k)
 
@@ -37,6 +37,8 @@ end
 switch penalty_type
     case 'L1'
         f = @(df, w, xi, L, t, x_prev) argmin_soft_threshold(df, dD, w, xi, L, t, x_prev, lambda, iterations);
+    case 'L1-f'
+        f = @(df, w, xi, L, t, x_prev) argmin_soft_threshold_f(df, dD, w, xi, L, t, x_prev, lambda, iterations, transform, itransform);
     case 'cauchy'
         %gamma = 2;
         f = @(df, w, xi, L, t, x_prev) argmin_cauchy(df, dD, w, xi, L, t, x_prev, lambda, iterations, gamma);

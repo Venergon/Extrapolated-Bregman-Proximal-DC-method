@@ -28,9 +28,9 @@ x_prev = x_curr;
 % Set the parameters for the extapolation parameter, based on the method to pick kappa in 
 % remark 3.2 in https://arxiv.org/pdf/2003.04124.pdf
 % Choose alpha_max as close as possible to 1 without reaching 1
-alpha_max = 0.99;
+alpha_max = 1;%0.99;
 nu_prev = 1;
-nu_curr = 1;
+nu_curr = (1 + sqrt(1 + 4*nu_prev^2))/2;
 n0 = 10000;
 max_diff = 0;
 
@@ -38,19 +38,20 @@ first_iteration = true;
 % Iterate until the stopping condition is reached, ignoring the first
 % iteration
 iteration = 0;
-while ~isnan(x_curr(1)) && ((first_iteration) || (~stop_fn(x_prev, x_curr, iteration)))
+
+while ~isnan(x_curr(1)) && ((~stop_fn(x_prev, x_curr, iteration)) || (first_iteration))
     iteration = iteration + 1;
     first_iteration = false;
     
     %% Step 1a: Choose alpha_k >= 0 and compute w_k = x_k + alpha_k*(x_k -
     % x_{k-1})
-    if (mod(iteration, n0) == 0)
+    if (mod(iteration, n0) == 10)
         % Reset nu every n0 iterations
         nu_prev = 1;
         nu_curr = 1;
     else
         nu_prev = nu_curr;
-        nu_curr = (1 + sqrt(1 + 4*nu_prev^2))/2;
+        nu_curr = (1 + sqrt(1 + 4*nu_curr^2))/2;
     end
     
     alpha = alpha_max * (nu_prev - 1)/nu_curr;
