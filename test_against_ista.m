@@ -1,7 +1,7 @@
 lambda = 2e-5;
-threshold_iterations = 1000;
+threshold_iterations = 100;
 rtol = 1e-4;
-max_iter = 125;
+max_iter = 200;
 
 X = double(imread('images/cameraman.pgm'));
 X = X/255;
@@ -37,7 +37,7 @@ wi= @(f) perform_wavelet_transf(f,Jmin,-1,options);
 obj_fn_L1 = @(x) (f(x) + penalty_2D_abs(w(x), lambda));
 
 
-stop_fn = @(obj_fn)  (@(x_prev, x_curr, iteration)((stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration)) || (iteration == max_iter)));
+stop_fn = @(obj_fn)  (@(x_prev, x_curr, iteration)(iteration == max_iter));
 
 dg_0 = @(x) (0);
 

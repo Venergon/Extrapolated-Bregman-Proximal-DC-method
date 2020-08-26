@@ -9,6 +9,8 @@ addpath('objective_functions');
 addpath('objective_functions/1D');
 addpath('objective_functions/2D');
 
+addpath('convex_derivatives');
+
 addpath('OTHER_FISTA');
 addpath('OTHER_HNO');
 addpath('OTHER_FISTA/OTHER_numerical_tour/numerical-tour/toolbox_signal');
