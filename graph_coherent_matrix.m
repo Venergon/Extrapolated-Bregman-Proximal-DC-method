@@ -27,7 +27,7 @@ M_arctan = (3*alpha_arctan^2*beta_arctan^(2/3))/(4*gamma_arctan);
 
 n_values = 100:100:4000;
 
-% Truncate all elements below this threshold
+% Truncate all elements below this threshold7
 threshold = 0.1;
 
 repeats = 10;
@@ -43,6 +43,7 @@ penalty_functions = ["arctan", "cauchy", "L1", "L1-L2", "L1-double L2", "L1-half
 for penalty_function_no = 1:length(penalty_functions)
     penalty_function_name = penalty_functions(penalty_function_no);
     
+    g = get_penalty_function(penalty_function_name, '1D', lambda, a, theta_MCP, theta_SCAD, alpha_arctan, beta_arctan, gamma_arctan, gamma_cauchy);
     dg = get_convex_derivative(penalty_function_name, lambda, a, theta_MCP, theta_SCAD, M_arctan);
     argmin_fn = get_argmin_fn_for_penalty(penalty_function_name, lambda, threshold_iterations, a, alpha_arctan, beta_arctan, gamma_arctan, gamma_cauchy);
     
@@ -89,7 +90,7 @@ for penalty_function_no = 1:length(penalty_functions)
             
             [f, df, L] = get_objective_function('1D-L2', A, b);
             
-            obj_fn = @(x) (f(x) + penalty_1D_L1_L2(x, lambda, 1));
+            obj_fn = @(x) (f(x) + g(x));
             stop_fn = @(x_prev, x_curr, iteration)(stop_fn_base(obj_fn, rtol, x0, x_prev, x_curr, iteration));
 
             tic
@@ -104,8 +105,8 @@ for penalty_function_no = 1:length(penalty_functions)
         dense(i) = dense(i) / repeats;
         diff(i) = diff(i) / repeats;
     end
-    
-            
+
+
     figure(t_fig);
     plot(n_values, t, 'DisplayName', penalty_function_name);
 
@@ -131,23 +132,4 @@ xlabel('Rows of A');
 figure(diff_fig);
 title('Average diff');
 legend('Location', 'NorthEast');
-ylabel('Average diff (2 norm of x - x_hat)');
-
-function [argmin_fn] = get_argmin_fn_for_penalty(penalty_function_name, lambda, threshold_iterations, a, alpha_arctan, beta_arctan, gamma_arctan, gamma_cauchy)
-
-argmin_fn_soft_lambda = get_argmin_function(lambda, 'L1', 'L2', threshold_iterations);
-argmin_fn_soft_TL1 = get_argmin_function((a+1)/a, 'L1', 'L2', threshold_iterations);
-argmin_fn_cauchy_lambda = get_argmin_function(lambda, 'cauchy', 'L2', threshold_iterations, 0, 0, gamma_cauchy);
-argmin_fn_arctan_lambda = get_argmin_function(lambda, 'arctan', 'L2', threshold_iterations, alpha_arctan, beta_arctan, gamma_arctan);
-
-switch penalty_function_name
-    case 'arctan'
-        argmin_fn = argmin_fn_arctan_lambda;
-    case 'cauchy'
-        argmin_fn = argmin_fn_cauchy_lambda;
-    case 'TL1'
-        argmin_fn = argmin_fn_soft_TL1;
-    otherwise
-        argmin_fn = argmin_fn_soft_lambda;
-end
-end
+ylabel('Average diff (2 norm of $x - \hat{x}$)', 'Interpreter', 'latex');

@@ -45,6 +45,8 @@ switch (penalty_function)
         dg = dg_SCAD;
     case 'TL1'
         dg = dg_TL1;
+    otherwise
+        error('Must have correct penalty function name');
 end
 end
 
