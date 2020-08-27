@@ -82,7 +82,7 @@ for penalty_function_no = 1:length(penalty_functions)
             %end
             b_hat = A*x_hat;
 
-            noise = normrnd(noise_mu, noise_sigma, n, repeats);
+            noise = normrnd(noise_mu, noise_sigma, n, 1);
             b = b_hat + noise;
 
             x0 = A \ b;
@@ -95,7 +95,6 @@ for penalty_function_no = 1:length(penalty_functions)
             tic
             x_approx = ExtendedProximalDCMethod(f, df, L, x0, dg, argmin_fn, stop_fn);
             t(i) = t(i) + toc;
-            
             dense(i) = dense(i) + nnz(truncate(x_approx, threshold));
             diff(i) = diff(i) + norm(x_approx - x_hat, 2);
         end
@@ -126,7 +125,7 @@ xlabel('Rows of A');
 figure(dense_fig);
 title('Average density');
 legend('Location', 'NorthEast');
-ylabel('Average density (# entires > 0.1)');
+ylabel('Average density (# entries > 0.1)');
 xlabel('Rows of A');
 
 figure(diff_fig);
