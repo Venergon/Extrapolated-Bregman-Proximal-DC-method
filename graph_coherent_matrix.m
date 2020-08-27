@@ -2,7 +2,7 @@
 % nXm, with some gaussian noise
 close all;
 
-rng_seed = 1;
+rng_seed = 0;
 
 rng(rng_seed);
 
@@ -25,13 +25,7 @@ alpha_arctan = 1;
 
 M_arctan = (3*alpha_arctan^2*beta_arctan^(2/3))/(4*gamma_arctan);
 
-min_n_power = 8; % for n = 256
-max_n_power = 12; % for n = 4096
-n_power_size = max_n_power - min_n_power + 1;
-
-% Plot all of the information for each penalty parameter
-n_powers = (min_n_power:max_n_power)';
-n_values = 2.^n_powers;
+n_values = 100:100:4000;
 
 % Truncate all elements below this threshold
 threshold = 0.1;
@@ -57,60 +51,54 @@ for penalty_function_no = 1:length(penalty_functions)
     diff = zeros(1, length(n_values));
     dense = zeros(1, length(n_values));
     
-    for i = 1:n_power_size
-        n_power = n_powers(i);
-        n = 2^n_power;
+    for i = 1:length(n_values)
+        n = n_values(i);
         fprintf('Starting %s with n = %d with %d repeats\n', penalty_function_name, n, repeats);
 
         % Reset rng so that we don't end up generating different matrices
         % for different penalty functions
         rng(rng_seed);
 
-        % Generate a highly coherent matrix using the oversampled discrete cosine
-        % transform from page 27 of https://arxiv.org/pdf/2003.04124.pdf
-        P = m;
-        F = 10;
-        w = rand(1, P)';
-        dct = @(w, j) 1/sqrt(P) .* cos(2.*pi.*w.*j./F);
-        A_base = zeros(n, m);
-        for j = 1:n
-            A_base(j, :) = dct(w, j);
-        end
-        A_noise = matrix_noise*rand(n, m);
-        A = A_base + A_noise;
-
-        x_hat = zeros(m, repeats);
-        for repeat = 1:repeats
-            x_hat(:, repeat) = sprand(m, 1, density);
-        end
-        % Normalise x_hat to have maximum magnitude of 1
-        %if (norm(x_hat, Inf) > 1)
-        %    x_hat = x_hat ./ norm(x_hat, Inf);
-        %end
-        b_hat = A*x_hat;
-
-        noise = normrnd(noise_mu, noise_sigma, n, repeats);
-        b = b_hat + noise;
-
-        x0 = A \ b;
-
-        tic
         fprintf('Calculating solution to %s problem with n=%d\n', penalty_function_name, n);
         for repeat=1:repeats
-            b_curr = b(:, repeat);
-            x_hat_curr = x_hat(:, repeat);
-            x0_curr = x0(:, repeat);
-            [f, df, L] = get_objective_function('1D-L2', A, b_curr);
+            % Generate a highly coherent matrix using the oversampled discrete cosine
+            % transform from page 27 of https://arxiv.org/pdf/2003.04124.pdf
+            P = m;
+            F = 10;
+            w = rand(1, P)';
+            dct = @(w, j) 1/sqrt(P) .* cos(2.*pi.*w.*j./F);
+            A_base = zeros(n, m);
+            for j = 1:n
+                A_base(j, :) = dct(w, j);
+            end
+            A_noise = matrix_noise*rand(n, m);
+            A = A_base + A_noise;
+
+            x_hat = sprand(m, 1, density);
+
+            % Normalise x_hat to have maximum magnitude of 1
+            %if (norm(x_hat, Inf) > 1)
+            %    x_hat = x_hat ./ norm(x_hat, Inf);
+            %end
+            b_hat = A*x_hat;
+
+            noise = normrnd(noise_mu, noise_sigma, n, repeats);
+            b = b_hat + noise;
+
+            x0 = A \ b;
+            
+            [f, df, L] = get_objective_function('1D-L2', A, b);
             
             obj_fn = @(x) (f(x) + penalty_1D_L1_L2(x, lambda, 1));
-            stop_fn = @(x_prev, x_curr, iteration)(stop_fn_base(obj_fn, rtol, x0_curr, x_prev, x_curr, iteration));
+            stop_fn = @(x_prev, x_curr, iteration)(stop_fn_base(obj_fn, rtol, x0, x_prev, x_curr, iteration));
 
-            x_approx = ExtendedProximalDCMethod(f, df, L, x0_curr, dg, argmin_fn, stop_fn);
+            tic
+            x_approx = ExtendedProximalDCMethod(f, df, L, x0, dg, argmin_fn, stop_fn);
+            t(i) = t(i) + toc;
             
             dense(i) = dense(i) + nnz(truncate(x_approx, threshold));
-            diff(i) = diff(i) + norm(x_approx - x_hat_curr, 2);
+            diff(i) = diff(i) + norm(x_approx - x_hat, 2);
         end
-        t(i) = toc;
 
         % divide by repeats to get average
         t(i) = t(i) / repeats;
