@@ -35,19 +35,22 @@ wi= @(f) perform_wavelet_transf(f,Jmin,-1,options);
 
 
 obj_fn_L1 = @(x) (f(x) + penalty_2D_abs(w(x), lambda));
+obj_fn_L1_L2 = @(x) (f(x) + penalty_2D_abs_frobenius(w(x), lambda));
 
 
 stop_fn = @(obj_fn)  (@(x_prev, x_curr, iteration)(iteration == max_iter));
 
 dg_0 = @(x) (0);
+dg_L2 = get_convex_derivative('L1-L2', lambda, 0, 0, 0, 0);
 
 stop_fn_L1 = stop_fn(obj_fn_L1);
+stop_fn_L1_L2 = stop_fn(obj_fn_L1_L2);
 
 argmin_fn_soft_lambda = get_argmin_function(lambda, 'L1-f', 'L2', threshold_iterations, 0, 0, 0, w, wi);
 
 tic
 disp('Calculating solution to problem');
-x_approx = ExtendedProximalDCMethod(f, df, L, x0, dg_0, argmin_fn_soft_lambda, stop_fn_L1);
+x_approx = ExtendedProximalDCMethod(f, df, L, x0, dg_L2, argmin_fn_soft_lambda, stop_fn_L1_L2);
 t = toc
 
 

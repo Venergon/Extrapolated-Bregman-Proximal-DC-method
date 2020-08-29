@@ -55,7 +55,7 @@ while ~isnan(x_curr(1)) && ((~stop_fn(x_prev, x_curr, iteration)) || (first_iter
     end
     
     alpha = alpha_max * (nu_prev - 1)/nu_curr;
-    %alpha = 0;
+    alpha = 0;
     
     w = x_curr + alpha.*(x_curr - x_prev);
     

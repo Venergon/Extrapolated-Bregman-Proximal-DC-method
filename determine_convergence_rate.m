@@ -1,64 +1,90 @@
-% Determine the convergence rate of a specific penalty function using a
-% random matrix
-rng(0);
+lambda = 2e-5;
+threshold_iterations = 100;
+rtol = 1e-4;
+max_iter = 200;
 
-rtol = 1e-10;
-lambda = 10;
-n = 1000;
-m = 2000;
-density = 0.01;
-noise_mu = 0;
-noise_sigma = 0.1;
-threshold_iterations = 10;
-theta_MCP = 5;
-theta_SCAD = 5;
-a = 1;
-gamma_cauchy = 2;
+X = double(imread('images/cameraman.pgm'));
+X = X/255;
+[P, center] = psfGauss([9, 9], 4);
 
-beta_arctan = sqrt(3)/3;
-gamma_arctan = pi/6;
-alpha_arctan = 1;
+B = imfilter(X, P, 'symmetric');
 
-M_arctan = (2*alpha_arctan^2*beta_arctan)/(gamma_arctan*(1+beta_arctan^2));
+randn('seed', 314);
+Bobs = B + 1e-3*randn(size(B));
 
-A = rand(n, m);
+subplot(2,2,1);
+imshow(X,[]);
+title('Original Image');
+subplot(2,2,2);
+imshow(Bobs,[]);
+title('Blurred Image');
 
-x_hat = sprand(m, 1, density);
-b_hat = A*x_hat;
+[f, df, L] = get_objective_function('2D-filter', 0, Bobs, P);
 
-noise = normrnd(noise_mu, noise_sigma, n, 1);
-b = b_hat + noise;
+x_hat = Bobs;
+x0 = Bobs;
 
-[f, df, L] = get_objective_function('1D-L2', A, b);
 
-x0 = A \ b;
+options.ti = 0;
+Jmin = 4;
 
-argmin_fn_soft_lambda = get_argmin_function(lambda, 'L1', 'L2', threshold_iterations);
-argmin_fn_soft_TL1 = get_argmin_function((a+1)/a, 'L1', 'L2', threshold_iterations);
-argmin_fn_cauchy_lambda = get_argmin_function(lambda, 'cauchy', 'L2', threshold_iterations, 0, 0, gamma_cauchy);
-argmin_fn_arctan_lambda = get_argmin_function(lambda, 'arctan', 'L2', threshold_iterations, alpha_arctan, beta_arctan, gamma_arctan);
+w= @(f) perform_wavelet_transf(f,Jmin,+1,options);
+wi= @(f) perform_wavelet_transf(f,Jmin,-1,options);
+%w = @(f) f;
+%wi = @(f) f;
 
-penalty_function_name = 'arctan';
 
-dg = get_convex_derivative(penalty_function_name, lambda, a, theta_MCP, theta_SCAD, M_arctan);
-g = get_penalty_function(penalty_function_name, '1D', lambda, a, theta_MCP, theta_SCAD, alpha_arctan, beta_arctan, gamma_arctan, gamma_cauchy);
-argmin_fn = get_argmin_fn_for_penalty(penalty_function_name, lambda, threshold_iterations, a, alpha_arctan, beta_arctan, gamma_arctan, gamma_cauchy);
+obj_fn_L1 = @(x) (f(x) + penalty_2D_abs(w(x), lambda));
+obj_fn_L1_L2 = @(x) (f(x) + penalty_2D_abs_frobenius(w(x), lambda));
 
-obj_fn = @(x) (f(x) + g(x));
+dg_0 = @(x) (0);
+dg_L2 = get_convex_derivative('L1-L2', lambda, 0, 0, 0, 0);
 
-stop_fn = @(x_prev, x_curr, iteration)(stop_fn_with_obj_value(obj_fn, rtol, x0, x_hat, x_prev, x_curr, iteration));
+dg = dg_0;
+obj_fn = obj_fn_L1;
+penalty_function_name = 'L1';
+
+argmin_fn = get_argmin_function(lambda, 'L1-f', 'L2', threshold_iterations, 0, 0, 0, w, wi);
+
+stop_fn_first = @(x_prev, x_curr, iteration)((iteration > max_iter*1.1) || stop_fn_base(obj_fn, rtol, x0, x_prev, x_curr, iteration));
+
+tic
+fprintf('Calculating once to get the optimal solution\n');
+x_optimal = ExtendedProximalDCMethod(f, df, L, x0, dg, argmin_fn, stop_fn_first);
+toc
+
+stop_fn_second = @(x_prev, x_curr, iteration)(stop_fn_with_obj_value(obj_fn, rtol, x0, x_optimal, x_prev, x_curr, iteration, max_iter));
 
 tic
 fprintf('Calculating objective values at each iteration for %s penalty\n', penalty_function_name);
-x_approx = ExtendedProximalDCMethod(f, df, L, x0, dg, argmin_fn_arctan_lambda, stop_fn);
-t_arctan = toc
+x_approx = ExtendedProximalDCMethod(f, df, L, x0, dg, argmin_fn, stop_fn_second);
+t = toc
 
-function [stop] = stop_fn_with_obj_value(obj_fn, rtol, x0, x_hat, x_prev, x_curr, iteration)
-    obj = obj_fn(x_curr);
-    obj_hat = obj_fn(x_hat);
-    fprintf('%d      %e     %e    %e\n', iteration, obj, obj_hat, obj - obj_hat);
+function [stop] = stop_fn_with_obj_value(obj_fn, rtol, x0, x_hat, x_prev, x_curr, iteration, max_iter)
+    persistent obj_values;
     
+    obj = obj_fn(x_curr);
+    obj_prev = obj_fn(x_prev);
+    obj_hat = obj_fn(x_hat);
+    
+    obj_err = abs(obj - obj_hat);
+    obj_values(iteration+1) = obj_err;
     stop = stop_fn_base(obj_fn, rtol, x0, x_prev, x_curr, iteration);
     
+    if iteration > max_iter
+        stop = 1;
+    end
+    if stop
+        iterations = 2:iteration;
+        %obj_values = obj_values(2:iteration);
+        
+        obj_diff = log(obj_values(2:iteration)) - log(obj_values(1:iteration-1));
+        iter_diff = log(2:iteration) - log(1:iteration-1);
+        obj_result = log(obj_values(2:iteration)) ./ log(iterations);%obj_diff; % ./ iter_diff;
+
+        close all;
+        figure();
+        plot(iterations, obj_result);
+    end
 end
 
