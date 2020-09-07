@@ -1,41 +1,54 @@
-lambda = 2e-5;
-threshold_iterations = 100;
-rtol = 1e-4;
-max_iter = 200;
+rtol = 1e-6;
+lambda = 10;
+n = 4096;
+m = 4096;
+matrix_noise = 0.1;
+density = 0.1;
+noise_mu = 0;
+noise_sigma = 0.1;
+threshold_iterations = 10;
+theta_MCP = 5;
+theta_SCAD = 5;
+a = 1;
+gamma_cauchy = 2;
 
-X = double(imread('images/cameraman.pgm'));
-X = X/255;
-[P, center] = psfGauss([9, 9], 4);
+beta_arctan = sqrt(3)/3;
+gamma_arctan = pi/6;
+alpha_arctan = 1;
 
-B = imfilter(X, P, 'symmetric');
+M_arctan = (3*alpha_arctan^2*beta_arctan^(2/3))/(4*gamma_arctan);
 
-randn('seed', 314);
-Bobs = B + 1e-3*randn(size(B));
+rng(0);
 
-subplot(2,2,1);
-imshow(X,[]);
-title('Original Image');
-subplot(2,2,2);
-imshow(Bobs,[]);
-title('Blurred Image');
+% Generate a highly coherent matrix using the oversampled discrete cosine
+% transform from page 27 of https://arxiv.org/pdf/2003.04124.pdf
+P = m;
+F = 10;
+w = rand(1, P)';
+dct = @(w, j) 1/sqrt(P) .* cos(2.*pi.*w.*j./F);
+A_base = zeros(n, m);
+for j = 1:n
+    A_base(j, :) = dct(w, j);
+end
+A_noise = matrix_noise*rand(n, m);
+A = A_base + A_noise;
 
-[f, df, L] = get_objective_function('2D-filter', 0, Bobs, P);
+x_hat = sprand(m, 1, density);
+% Normalise x_hat to have maximum magnitude of 1
+%if (norm(x_hat, Inf) > 1)
+%    x_hat = x_hat ./ norm(x_hat, Inf);
+%end
+b_hat = A*x_hat;
 
-x_hat = Bobs;
-x0 = Bobs;
+noise = normrnd(noise_mu, noise_sigma, n, 1);
+b = b_hat + noise;
 
+[f, df, L] = get_objective_function('1D-L2', A, b);
 
-options.ti = 0;
-Jmin = 4;
+x0 = A \ b;
 
-w= @(f) perform_wavelet_transf(f,Jmin,+1,options);
-wi= @(f) perform_wavelet_transf(f,Jmin,-1,options);
-%w = @(f) f;
-%wi = @(f) f;
-
-
-obj_fn_L1 = @(x) (f(x) + penalty_2D_abs(w(x), lambda));
-obj_fn_L1_L2 = @(x) (f(x) + penalty_2D_abs_frobenius(w(x), lambda));
+obj_fn_L1 = @(x) (f(x) + penalty_1D_L1(x, lambda));
+obj_fn_L1_L2 = @(x) (f(x) + penalty_1D_L1_L2(x, lambda));
 
 dg_0 = @(x) (0);
 dg_L2 = get_convex_derivative('L1-L2', lambda, 0, 0, 0, 0);
@@ -44,9 +57,11 @@ dg = dg_0;
 obj_fn = obj_fn_L1;
 penalty_function_name = 'L1';
 
-argmin_fn = get_argmin_function(lambda, 'L1-f', 'L2', threshold_iterations, 0, 0, 0, w, wi);
+argmin_fn = get_argmin_function(lambda, 'L1', 'L2', threshold_iterations, 0, 0, 0, 0, 0);
 
-stop_fn_first = @(x_prev, x_curr, iteration)((iteration > max_iter*1.1) || stop_fn_base(obj_fn, rtol, x0, x_prev, x_curr, iteration));
+max_iter = 100000;
+
+stop_fn_first = @(x_prev, x_curr, iteration)((iteration > max_iter) || stop_fn_base(obj_fn, rtol, x0, x_prev, x_curr, iteration));
 
 tic
 fprintf('Calculating once to get the optimal solution\n');
@@ -74,17 +89,19 @@ function [stop] = stop_fn_with_obj_value(obj_fn, rtol, x0, x_hat, x_prev, x_curr
     if iteration > max_iter
         stop = 1;
     end
-    if stop
+    if stop && iteration > 0
         iterations = 2:iteration;
         %obj_values = obj_values(2:iteration);
         
         obj_diff = log(obj_values(2:iteration)) - log(obj_values(1:iteration-1));
         iter_diff = log(2:iteration) - log(1:iteration-1);
-        obj_result = log(obj_values(2:iteration)) ./ log(iterations);%obj_diff; % ./ iter_diff;
+        obj_result = log(obj_values(2:iteration)) ./ log(1:iteration-1);%obj_diff; % ./ iter_diff;
 
         close all;
         figure();
         plot(iterations, obj_result);
+        hold on;
+        plot(iterations, obj_result(end).*ones(size(iterations)));
     end
 end
 

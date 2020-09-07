@@ -2,7 +2,7 @@
 % nXm, with some gaussian noise
 rng(0);
 
-rtol = 1e-4;
+rtol = 1e-6;
 lambda = 10;
 n = 1000;
 m = 2000;
@@ -60,7 +60,7 @@ obj_fn_TL1 = @(x) (f(x) + penalty_1D_TL1(x, lambda, a));
 obj_fn_cauchy = @(x) (f(x) + penalty_1D_cauchy(x, lambda, gamma_cauchy));
 obj_fn_arctan = @(x) (f(x) + penalty_1D_arctan(x, lambda, alpha_arctan, beta_arctan, gamma_arctan));
 
-stop_fn = @(obj_fn)  (@(x_prev, x_curr, iteration)(stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration)));
+stop_fn = @(obj_fn)  (@(x_prev, x_curr, iteration)(stop_fn_base(obj_fn, rtol, x0, x_prev, x_curr, iteration)));
 
 stop_fn_L1_L2 = stop_fn(obj_fn_L1_L2);
 stop_fn_L1_half_L2 = stop_fn(obj_fn_L1_half_L2);
@@ -145,17 +145,17 @@ threshold = 0.1;
 
 % Plot the values of each version of x to see how close they are
 indices = 1:m;
-%plot(indices, truncate(x_hat, threshold), 'x', 'DisplayName', 'Original x');
+plot(indices, x_hat, 'o', 'DisplayName', 'Original Signal');
 hold on;
-plot(indices, truncate(x_L1_L2, threshold), 'x', 'DisplayName', 'L1 - L2');
-plot(indices, truncate(x_L1, threshold), 'x', 'DisplayName', 'L1');
-plot(indices, truncate(x_MCP, threshold), 'x', 'DisplayName', 'MCP');
-plot(indices, truncate(x_SCAD, threshold), 'x', 'DisplayName', 'SCAD');
-plot(indices, truncate(x_TL1, threshold), 'x', 'DisplayName', 'TL1');
-plot(indices, truncate(x_cauchy, threshold), 'x', 'DisplayName', 'Cauchy priory');
-plot(indices, truncate(x_arctan, threshold), 'x', 'DisplayName', 'Arctan');
-plot(indices, truncate(x_L1_half_L2, threshold), 'x', 'DisplayName', 'L1-1/2*L2');
-plot(indices, truncate(x_L1_double_L2, threshold), 'x', 'DisplayName', 'L1-2*L2');
+plot(indices, x_L1_L2, 'x', 'DisplayName', 'L1 - L2');
+plot(indices, x_L1, 'x', 'DisplayName', 'L1');
+plot(indices, x_MCP, 'x', 'DisplayName', 'MCP');
+plot(indices, x_SCAD, 'x', 'DisplayName', 'SCAD');
+plot(indices, x_TL1, 'x', 'DisplayName', 'TL1');
+plot(indices, x_cauchy, 'x', 'DisplayName', 'Cauchy priory');
+plot(indices, x_arctan, '*', 'DisplayName', 'Arctan');
+plot(indices, x_L1_half_L2, '*', 'DisplayName', 'L1-1/2*L2');
+plot(indices, x_L1_double_L2, '*', 'DisplayName', 'L1-2*L2');
 
 
 legend('Location', 'NorthWest');
@@ -172,6 +172,16 @@ dense_cauchy = nnz(truncate(x_cauchy, threshold));
 dense_arctan = nnz(truncate(x_arctan, threshold));
 dense_L1_half_L2 = nnz(truncate(x_L1_half_L2, threshold));
 dense_L1_double_L2 = nnz(truncate(x_L1_double_L2, threshold));
+
+diff_L1_L2 = norm(x_L1_L2 - x_hat, 2);
+diff_L1 = norm(x_L1 - x_hat, 2);
+diff_MCP = norm(x_MCP - x_hat, 2);
+diff_SCAD = norm(x_SCAD - x_hat, 2);
+diff_TL1 = norm(x_TL1 - x_hat, 2);
+diff_cauchy = norm(x_cauchy - x_hat, 2);
+diff_arctan = norm(x_arctan - x_hat, 2);
+diff_L1_half_L2 = norm(x_L1_half_L2 - x_hat, 2);
+diff_L1_double_L2 = norm(x_L1_double_L2 - x_hat, 2);
 
 
 function [dg] = dg_2_norm(x) 
