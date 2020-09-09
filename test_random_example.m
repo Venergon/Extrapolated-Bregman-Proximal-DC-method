@@ -1,6 +1,6 @@
 % Test ExtendedProximalDCMethod using a randomly generated matrix of size
 % nXm, with some gaussian noise
-rng(0);
+rng(1);
 
 rtol = 1e-6;
 lambda = 10;
