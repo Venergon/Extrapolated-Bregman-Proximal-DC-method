@@ -30,7 +30,9 @@ b = A*x_ideal;
 [f, df, L] = get_objective_function('1D-L2', A, b);
 
 close all;
-figure();
+t_fig = figure();
+hold on;
+diff_fig = figure();
 hold on;
 
 penalty_functions = ["arctan", "cauchy", "L1", "L1-L2", "L1-double L2", "L1-half L2", "MCP", "SCAD", "TL1"];
@@ -45,8 +47,9 @@ for penalty_function_no = 1:length(penalty_functions)
 
     obj_fn = @(x) (f(x) + g(x));
 
-    t_vals = -10:10;
+    t_vals = -20:20;
     approx_t_vals = zeros(size(t_vals));
+    diff_vals = zeros(size(t_vals)); 
 
     for i = 1:length(t_vals)
         t = t_vals(i);
@@ -61,14 +64,26 @@ for penalty_function_no = 1:length(penalty_functions)
 
         [approx_t, diff] = find_closest_toy_parameter(x_approx);
         approx_t_vals(i) = approx_t;
+        diff_vals(i) = diff;
     end
     
+    figure(t_fig);
     plot(t_vals, approx_t_vals, '-x', 'DisplayName', penalty_function_name);
+    
+    figure(diff_fig);
+    plot(t_vals, diff_vals, '-x', 'DisplayName', penalty_function_name);
 end
 
+figure(t_fig);
 yline(0, 'DisplayName', 'Optimal Solution');
 xlabel('t for x0');
 ylabel('approx t for solution');
+
+legend('Location', 'NorthWest');
+
+figure(diff_fig);
+xlabel('t for x0');
+ylabel('diff from closest t for solution');
 
 legend('Location', 'NorthWest');
 
