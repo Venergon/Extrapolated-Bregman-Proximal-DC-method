@@ -79,7 +79,7 @@ yline(0, 'DisplayName', 'Optimal Solution');
 xlabel('t for x0');
 ylabel('approx t for solution');
 
-legend('Location', 'NorthWest');
+legend('Location', 'SouthWest');
 
 figure(diff_fig);
 xlabel('t for x0');
