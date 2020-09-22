@@ -16,6 +16,10 @@ dg_half_L2 = @(x) lambda*dg_2_norm(x)/2;
 dg_double_L2 = @(x) lambda*dg_2_norm(x)*2;
 dg_0 = @(x) (0);
 
+dg_fro = @(x) lambda*dg_fro_norm(x);
+dg_half_fro = @(x) lambda*dg_fro_norm(x)/2;
+dg_double_fro = @(x) lambda*dg_fro_norm(x)*2;
+
 % DC decompositions of MCP, SCAD and Transformed L1 come from 
 % https://link.springer.com/article/10.1007/s10589-017-9954-1
 % All three use the L1 norm as the positive convex part
@@ -39,6 +43,12 @@ switch (penalty_function)
         dg = dg_double_L2;
     case 'L1-half L2'
         dg = dg_half_L2;
+    case 'L1-fro'
+        dg = dg_fro;
+    case 'L1-double fro'
+        dg = dg_double_fro;
+    case 'L1-half fro'
+        dg = dg_half_fro;
     case 'MCP'
         dg = dg_MCP;
     case 'SCAD'
@@ -55,5 +65,13 @@ function [dg] = dg_2_norm(x)
         dg = 0;
     else
         dg = x ./ norm(x, 2);
+    end
+end
+
+function [dg] = dg_fro_norm(x)
+    if x == 0
+        dg = 0;
+    else
+        dg = x ./ norm(x, 'fro');
     end
 end

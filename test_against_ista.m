@@ -3,6 +3,8 @@ threshold_iterations = 100;
 rtol = 1e-4;
 max_iter = 200;
 
+close all;
+
 X = double(imread('images/cameraman.pgm'));
 X = X/255;
 [P, center] = psfGauss([9, 9], 4);
@@ -12,12 +14,12 @@ B = imfilter(X, P, 'symmetric');
 randn('seed', 314);
 Bobs = B + 1e-3*randn(size(B));
 
-subplot(2,2,1);
+figure();
 imshow(X,[]);
 title('Original Image');
-subplot(2,2,2);
+figure();
 imshow(Bobs,[]);
-title('Blurred Image');
+title(sprintf('Blurred Image, PSNR = %2.2f dB', psnr(Bobs, X)));
 
 [f, df, L] = get_objective_function('2D-filter', 0, Bobs, P);
 
@@ -35,13 +37,13 @@ wi= @(f) perform_wavelet_transf(f,Jmin,-1,options);
 
 
 obj_fn_L1 = @(x) (f(x) + penalty_2D_abs(w(x), lambda));
-obj_fn_L1_L2 = @(x) (f(x) + penalty_2D_abs_frobenius(w(x), lambda));
+obj_fn_L1_L2 = @(x) (f(x) + penalty_2D_abs_frobenius(w(x), lambda, 1));
 
 
 stop_fn = @(obj_fn)  (@(x_prev, x_curr, iteration)(iteration == max_iter));
 
 dg_0 = @(x) (0);
-dg_L2 = get_convex_derivative('L1-L2', lambda, 0, 0, 0, 0);
+dg_L2 = get_convex_derivative('L1-fro', lambda, 0, 0, 0, 0);
 
 stop_fn_L1 = stop_fn(obj_fn_L1);
 stop_fn_L1_L2 = stop_fn(obj_fn_L1_L2);
@@ -49,14 +51,24 @@ stop_fn_L1_L2 = stop_fn(obj_fn_L1_L2);
 argmin_fn_soft_lambda = get_argmin_function(lambda, 'L1-f', 'L2', threshold_iterations, 0, 0, 0, w, wi);
 
 tic
-disp('Calculating solution to problem');
-x_approx = ExtendedProximalDCMethod(f, df, L, x0, dg_L2, argmin_fn_soft_lambda, stop_fn_L1_L2);
-t = toc
+disp('Calculating L1 solution to problem');
+x_L1 = ExtendedProximalDCMethod(f, df, L, x0, dg_0, argmin_fn_soft_lambda, stop_fn_L1);
+t_L1 = toc
 
 
-subplot(2,2,3);
-imshow(x_approx,[]);
-title('Recovered Image');
+figure();
+imshow(x_L1,[]);
+title(sprintf('L1 penalty (%d iterations), PSNR = %2.2f dB', max_iter, psnr(x_L1, X)));
+
+tic
+disp('Calculating L1-L2 solution to problem');
+x_L1_L2 = ExtendedProximalDCMethod(f, df, L, x0, dg_L2, argmin_fn_soft_lambda, stop_fn_L1_L2);
+t_L1_L2 = toc
+
+
+figure();
+imshow(x_L1_L2,[]);
+title(sprintf('L1-L2 penalty (%d iterations), PSNR = %2.2f dB', max_iter, psnr(x_L1_L2, X)));
 
 
 Gpic = @(x)  sum(sum(abs(w(x))));
@@ -67,15 +79,22 @@ par.max_iter = max_iter;
 x_pg=prox_gradient(f,df, @(x) Gpic(x), @(x,alpha)prox_gpic(x,alpha),lambda,x0,par);
 
 par.max_iter = max_iter - 1;
-x_pg_less =prox_gradient(f,df, @(x) Gpic(x), @(x,alpha)prox_gpic(x,alpha),lambda,x0,par);
+x_pg_less = prox_gradient(f,df, @(x) Gpic(x), @(x,alpha)prox_gpic(x,alpha),lambda,x0,par);
 
 par.max_iter = max_iter + 1;
 x_pg_more = prox_gradient(f,df, @(x) Gpic(x), @(x,alpha)prox_gpic(x,alpha),lambda,x0,par);
 
-subplot(2, 2, 4);
+figure()
 imshow(x_pg, []);
-title('proximal gradient');
+title(sprintf('ISTA (%d iterations), PSNR = %2.2f dB', max_iter, psnr(x_pg, X)));
 
-diff_less = norm(x_pg_less - x_approx, inf)
-diff = norm(x_pg - x_approx, inf)
-diff_more = norm(x_pg_more - x_approx, inf)
+x_fista = fista(f, df, @(x) Gpic(x), @(x, alpha) prox_gpic(x, alpha), lambda, x0, par);
+figure()
+imshow(x_fista, []);
+title(sprintf('FISTA (%d iterations), PSNR = %2.2f dB', max_iter, psnr(x_fista, X)));
+
+
+
+diff_less = norm(x_pg_less - x_L1_L2, inf)
+diff = norm(x_pg - x_L1_L2, inf)
+diff_more = norm(x_pg_more - x_L1_L2, inf)
