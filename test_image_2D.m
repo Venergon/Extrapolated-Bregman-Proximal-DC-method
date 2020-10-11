@@ -1,121 +1,103 @@
-% Test Extended Bregman Proximal DC method using an image
-image_name = 'peppers.png';
-rng(0);
+lambda = 2e-5;
+threshold_iterations = 100;
+rtol = 1e-4;
+max_iter = 200;
+weighting = 6e4;
 
-rtol = 1e-10;
-mu = 0;
-sigma = 50;
-threshold_iterations = 10;
-theta_MCP = 5;
-theta_SCAD = 5;
-a = 1;
-gamma_cauchy = 2;
-lambda = 2000;
 
-beta_arctan = sqrt(3)/3;
-gamma_arctan = pi/6;
-alpha_arctan = 1;
+close all;
 
-M_arctan = (2*alpha_arctan^2*beta_arctan)/(gamma_arctan*(1+beta_arctan^2));
+X = double(imread('images/cameraman.pgm'));
+X = X/255;
+[P, center] = psfGauss([9, 9], 4);
 
-M_cauchy = 2;
+B = imfilter(X, P, 'symmetric');
 
-image = rgb2gray(imread(strcat('images/', image_name)));
-image = imresize(image, 1);
-image = double(image);
-[height, width] = size(image);
+randn('seed', 314);
+Bobs = B + 1e-3*randn(size(B));
 
-subplot(2, 2, 1);
-imshow(uint8(image));
-title('Original Image');
+figure();
+subplot(1, 2, 1);
+imshow(X,[]);
+title('Original Image', 'interpreter', 'latex');
+subplot(1, 2, 2);
+imshow(Bobs,[]);
+title(sprintf('Blurred Image,\nPSNR = %2.2f dB', psnr(Bobs, X)), 'interpreter', 'latex');
 
-noise = normrnd(mu, sigma, height, width);
-noisy_image = image + noise;
+[f, df, L] = get_objective_function('2D-filter', 0, Bobs, P);
 
-subplot(2, 2, 2);
-imshow(uint8(noisy_image));
-title(sprintf('Noisy Image, PSNR = %2.2f dB', psnr(uint8(noisy_image), uint8(image))));
+x_hat = Bobs;
+x0 = Bobs;
 
-transformed_image = fft2(noisy_image);
-%transformed_image_vector_complex = reshape(transformed_image, height*width, 1);
 
-%image_vector = reshape(noisy_image, height*width, 1);
-%transformed_image_vector_complex = fft(image_vector);
-%transformed_image_vector = split_complex(transformed_image_vector_complex);
-A = speye(length(transformed_image));
-b = A*transformed_image;
+options.ti = 0;
+Jmin = 4;
 
-[f, df, L] = get_objective_function('2D-fro', A, b);
+w= @(f) perform_wavelet_transf(f,Jmin,+1,options);
+wi= @(f) perform_wavelet_transf(f,Jmin,-1,options);
 
-x_hat = transformed_image;
-x0 = transformed_image;
+obj_fn_L1 = @(x) (f(x) + penalty_2D_abs(w(x), lambda));
+obj_fn_L1_L2 = @(x) (f(x) + penalty_2D_abs_frobenius(w(x), lambda, weighting));
 
-dg_L2 = @(x) lambda*dg_2_norm(x);
-dg_half_L2 = @(x) lambda*dg_2_norm(x)/2;
-dg_double_L2 = @(x) lambda*dg_2_norm(x)*2;
+
+stop_fn = @(obj_fn)  (@(x_prev, x_curr, iteration)(iteration == max_iter));
+
 dg_0 = @(x) (0);
-
-% DC decompositions of MCP, SCAD and Transformed L1 come from 
-% https://link.springer.com/article/10.1007/s10589-017-9954-1
-% All three use the L1 norm as the positive convex part
-dg_MCP = @(x) (lambda.*sign(x).*min(1, abs(x)/(theta_MCP*lambda)));
-dg_SCAD = @(x) (sign(x).*max(min(theta_SCAD*lambda, abs(x)) - lambda, 0)/(theta_SCAD - 1));
-dg_TL1 = @(x) (sign(x).*((a+1)/(a)) - sign(x).*(a^2 + a)./((a + abs(x)).^2));
-
-dg_cauchy = @(x) lambda*M_cauchy*x;
-dg_arctan = @(x) lambda*M_arctan*x;
-
-obj_fn_L1_L2 = @(x) (f(x) + penalty_2D_abs_frobenius(x, lambda, 1));
-obj_fn_L1_half_L2 = @(x) (f(x) + penalty_2D_abs_frobenius(x, lambda, 1/2));
-obj_fn_L1_double_L2 = @(x) (f(x) + penalty_2D_abs_frobenius(x, lambda, 2));
-
-obj_fn_L1 = @(x) (f(x) + penalty_2D_abs(x, lambda));%penalty_L1(x, lambda));
-obj_fn_MCP = @(x) (f(x) + penalty_2D_MCP(x, lambda, theta_MCP));
-obj_fn_SCAD = @(x) (f(x) + penalty_2D_SCAD(x, lambda, theta_SCAD));
-obj_fn_TL1 = @(x) (f(x) + penalty_2D_TL1(x, lambda, a));
-obj_fn_cauchy = @(x) (f(x) + penalty_2D_cauchy(x, lambda, gamma_cauchy));
-obj_fn_arctan = @(x) (f(x) + penalty_2D_arctan(x, lambda, alpha_arctan, beta_arctan, gamma_arctan));
-
-stop_fn = @(obj_fn)  (@(x_prev, x_curr, iteration)(stop_fn_base(obj_fn, rtol, x_hat, x_prev, x_curr, iteration)));
-
-stop_fn_L1_L2 = stop_fn(obj_fn_L1_L2);
-stop_fn_L1_half_L2 = stop_fn(obj_fn_L1_half_L2);
-stop_fn_L1_double_L2 = stop_fn(obj_fn_L1_double_L2);
+dg_fro = get_convex_derivative('L1-fro', lambda, 0, 0, 0, 0);
+dg_L2 = @(x) (weighting*dg_fro(x));
 
 stop_fn_L1 = stop_fn(obj_fn_L1);
-stop_fn_MCP = stop_fn(obj_fn_MCP);
-stop_fn_SCAD = stop_fn(obj_fn_SCAD);
-stop_fn_TL1 = stop_fn(obj_fn_TL1);
-stop_fn_cauchy = stop_fn(obj_fn_cauchy);
-stop_fn_arctan = stop_fn(obj_fn_arctan);
+stop_fn_L1_L2 = stop_fn(obj_fn_L1_L2);
 
-
-argmin_fn_soft_lambda = get_argmin_function(lambda, 'L1', 'L2', threshold_iterations);
-argmin_fn_soft_TL1 = get_argmin_function((a+1)/a, 'L1', 'L2', threshold_iterations);
-argmin_fn_cauchy_lambda = get_argmin_function(lambda, 'cauchy', 'L2', threshold_iterations);
-argmin_fn_arctan_lambda = get_argmin_function(lambda, 'arctan', 'L2', threshold_iterations);
+argmin_fn_soft_lambda = get_argmin_function(lambda, 'L1-f', 'L2', threshold_iterations, 0, 0, 0, w, wi);
 
 tic
-disp('Calculating solution to problem');
-x_approx = ExtendedProximalDCMethod(f, df, L, x0, dg_L2, argmin_fn_soft_lambda, stop_fn_L1_L2);
-t = toc
-
-%x_approx_combined = combine_complex(x_approx);
-
-%x_approx_reshaped = reshape(x_approx_combined, height, width);
-image_approx = ifft2(x_approx);
-%x_untransformed = ifft(x_approx_combined);
-%image_approx = reshape(x_untransformed, height, width);
-
-subplot(2, 2, 3);
-imshow(uint8(image_approx));
-title(sprintf('Denoised Image, PSNR = %2.2f dB', psnr(uint8(image_approx), uint8(image))));
+disp('Calculating L1 solution to problem');
+x_L1 = ExtendedProximalDCMethod(f, df, L, x0, dg_0, argmin_fn_soft_lambda, stop_fn_L1);
+t_L1 = toc
 
 
-function [dg] = dg_2_norm(x) 
-    if x == 0
-        dg = 0;
-    else
-        dg = x ./ norm(x, 2);
-    end
-end
+figure();
+subplot(1, 2, 1);
+imshow(x_L1,[]);
+title(sprintf('$L_{1,1}$ penalty (%d iterations),\nPSNR = %2.2f dB', max_iter, psnr(x_L1, X)), 'interpreter', 'latex');
+
+tic
+disp('Calculating L1-L2 solution to problem');
+x_L1_L2 = ExtendedProximalDCMethod(f, df, L, x0, dg_L2, argmin_fn_soft_lambda, stop_fn_L1_L2);
+t_L1_L2 = toc
+
+subplot(1, 2, 2);
+imshow(x_L1_L2,[]);
+title(sprintf('$L_{1,1}-aL_{2,2}$ penalty (%d iterations),\nPSNR = %2.2f dB', max_iter, psnr(x_L1_L2, X)), 'interpreter', 'latex');
+
+
+Gpic = @(x)  sum(sum(abs(w(x))));
+prox_gpic = @(x,a) wi(prox_l1(w(x),a));
+
+clear par;
+par.max_iter = max_iter;
+x_pg=prox_gradient(f,df, @(x) Gpic(x), @(x,alpha)prox_gpic(x,alpha),lambda,x0,par);
+
+par.max_iter = max_iter - 1;
+x_pg_less = prox_gradient(f,df, @(x) Gpic(x), @(x,alpha)prox_gpic(x,alpha),lambda,x0,par);
+
+par.max_iter = max_iter + 1;
+x_pg_more = prox_gradient(f,df, @(x) Gpic(x), @(x,alpha)prox_gpic(x,alpha),lambda,x0,par);
+
+figure()
+subplot(1, 2, 1);
+imshow(x_pg, []);
+title(sprintf('ISTA (%d iterations),\nPSNR = %2.2f dB', max_iter, psnr(x_pg, X)), 'interpreter', 'latex');
+
+x_fista = fista(f, df, @(x) Gpic(x), @(x, alpha) prox_gpic(x, alpha), lambda, x0, par);
+
+subplot(1, 2, 2);
+imshow(x_fista, []);
+title(sprintf('FISTA (%d iterations),\nPSNR = %2.2f dB', max_iter, psnr(x_fista, X)), 'interpreter', 'latex');
+
+
+
+diff_less = norm(x_pg_less - x_L1, inf)
+diff = norm(x_pg - x_L1, inf)
+diff_more = norm(x_pg_more - x_L1, inf)

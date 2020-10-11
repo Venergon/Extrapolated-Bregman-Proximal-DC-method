@@ -69,7 +69,7 @@ t_L1_L2 = toc
 
 subplot(1, 2, 2);
 imshow(x_L1_L2,[]);
-title(sprintf('$L_{1,1}-%dL_{2,2}$ penalty (%d iterations),\nPSNR = %2.2f dB', weighting, max_iter, psnr(x_L1_L2, X)), 'interpreter', 'latex');
+title(sprintf('$L_{1,1}-aL_{2,2}$ penalty (%d iterations),\nPSNR = %2.2f dB', max_iter, psnr(x_L1_L2, X)), 'interpreter', 'latex');
 
 
 Gpic = @(x)  sum(sum(abs(w(x))));
