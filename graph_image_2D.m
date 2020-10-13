@@ -3,7 +3,7 @@ close all;
 lambda = 2e-5;
 threshold_iterations = 100;
 rtol = 1e-4;
-max_iter = 200;
+max_iter = 2000;
 
 weightings = 0:1000:1e5;%[1e0, 1e1, 5e1, 1e2, 5e2, 1e3, 5e3, 1e4, 5e4, 6e4, 7e4, 1e5];
 psnrs = zeros(size(weightings));
@@ -34,7 +34,7 @@ wi= @(f) perform_wavelet_transf(f,Jmin,-1,options);
 
 
 
-stop_fn = @(obj_fn)  (@(x_prev, x_curr, iteration)(iteration == max_iter));
+stop_fn = @(obj_fn)  (@(x_prev, x_curr, iteration)((iteration == max_iter) || (norm(x_prev - x_curr, 'inf') < 0.01)));
 
 dg_0 = @(x) (0);
 dg_fro = get_convex_derivative('L1-fro', lambda, 0, 0, 0, 0);

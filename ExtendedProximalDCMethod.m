@@ -67,7 +67,7 @@ while ~isnan(x_curr(1)) && ((~stop_fn(x_prev, x_curr, iteration)) || (first_iter
     % x_{k+1} \in argmin_{x} {lambda*g_1(x) + <\nabla f(w_k) - xi_k, x - w_k> +
     % L/2*||x - w_k||_2^2 + 1/t_k*D(x, x_k)
     
-    % TODO: Currently got a static step size t_k = 1
+    % Currently got a static step size t_k = 1
     t = 1;
     
     x_next = calculate_argmin(df, w, xi, L, t, x_curr);
