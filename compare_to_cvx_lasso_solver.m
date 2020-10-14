@@ -1,4 +1,4 @@
-% Test ExtendedProximalDCMethod using a randomly generated matrix of  size
+% Test ExtrapolatedProximalDCMethod using a randomly generated matrix of  size
 % nXm, with some gaussian noise
 
 % Compare to cvx (http://cvxr.com/cvx/), solving the L1 penalty problem in
@@ -40,12 +40,12 @@ stop_fn = @(x_prev, x_curr, iteration) (stop_fn_base(obj_fn, rtol, x_hat, x_prev
 obj_fn(x0)
 obj_fn(x_hat)
 
-disp('Starting Extended Bregman Proximal DC Method');
+disp('Starting Extrapolated Bregman Proximal DC Method');
 tic
 thresh = get_argmin_function(lambda, 'cauchy', 'L2', threshold_iterations, 0, 0, gamma);
-x_bregman = ExtendedProximalDCMethod(f, df, L, x0, dg, thresh, stop_fn);
+x_bregman = ExtrapolatedProximalDCMethod(f, df, L, x0, dg, thresh, stop_fn);
 time_bregman = toc
-disp('Finished Extended Bregman Proximal DC Method');
+disp('Finished Extrapolated Bregman Proximal DC Method');
 obj_fn(x0)
 obj_fn(x_bregman)
 obj_fn(x_hat)

@@ -52,7 +52,7 @@ for i=1:length(weightings)
 
     tic
     fprintf('Calculating L1- %f L2 solution to problem\n', weighting);
-    x_L1_L2 = ExtendedProximalDCMethod(f, df, L, x0, dg_L2, argmin_fn_soft_lambda, stop_fn_L1_L2);
+    x_L1_L2 = ExtrapolatedProximalDCMethod(f, df, L, x0, dg_L2, argmin_fn_soft_lambda, stop_fn_L1_L2);
     t_L1_L2 = toc
 
     psnrs(i) = psnr(x_L1_L2, X);

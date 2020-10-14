@@ -53,7 +53,7 @@ argmin_fn_soft_lambda = get_argmin_function(lambda, 'L1-f', 'L2', threshold_iter
 
 tic
 disp('Calculating L1 solution to problem');
-x_L1 = ExtendedProximalDCMethod(f, df, L, x0, dg_0, argmin_fn_soft_lambda, stop_fn_L1);
+x_L1 = ExtrapolatedProximalDCMethod(f, df, L, x0, dg_0, argmin_fn_soft_lambda, stop_fn_L1);
 t_L1 = toc
 
 
@@ -64,7 +64,7 @@ title(sprintf('$L_{1,1}$ penalty (%d iterations),\nPSNR = %2.2f dB', max_iter, p
 
 tic
 disp('Calculating L1-L2 solution to problem');
-x_L1_L2 = ExtendedProximalDCMethod(f, df, L, x0, dg_L2, argmin_fn_soft_lambda, stop_fn_L1_L2);
+x_L1_L2 = ExtrapolatedProximalDCMethod(f, df, L, x0, dg_L2, argmin_fn_soft_lambda, stop_fn_L1_L2);
 t_L1_L2 = toc
 
 subplot(1, 2, 2);

@@ -59,7 +59,7 @@ stop_fn = @(x_prev, x_curr, iteration)(obj_fn(x_curr) < obj_fn(x_prev) && obj_fn
 
 threshold_iterations = 10;
 argmin_function = get_argmin_function(lambda, 'cauchy', 'L2', threshold_iterations, 0, 0, gamma_cauchy);
-x_approx = ExtendedProximalDCMethod(f, df, L, x0, dg, argmin_function, stop_fn);
+x_approx = ExtrapolatedProximalDCMethod(f, df, L, x0, dg, argmin_function, stop_fn);
 b_approx = A*x_approx;
 
 obj_ideal = obj_fn(x_ideal);

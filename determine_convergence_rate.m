@@ -65,14 +65,14 @@ stop_fn_first = @(x_prev, x_curr, iteration)((iteration > max_iter) || stop_fn_b
 
 tic
 fprintf('Calculating once to get the optimal solution\n');
-x_optimal = ExtendedProximalDCMethod(f, df, L, x0, dg, argmin_fn, stop_fn_first);
+x_optimal = ExtrapolatedProximalDCMethod(f, df, L, x0, dg, argmin_fn, stop_fn_first);
 toc
 
 stop_fn_second = @(x_prev, x_curr, iteration)(stop_fn_with_obj_value(obj_fn, rtol, x0, x_optimal, x_prev, x_curr, iteration, max_iter));
 
 tic
 fprintf('Calculating objective values at each iteration for %s penalty\n', penalty_function_name);
-x_approx = ExtendedProximalDCMethod(f, df, L, x0, dg, argmin_fn, stop_fn_second);
+x_approx = ExtrapolatedProximalDCMethod(f, df, L, x0, dg, argmin_fn, stop_fn_second);
 t = toc
 
 function [stop] = stop_fn_with_obj_value(obj_fn, rtol, x0, x_hat, x_prev, x_curr, iteration, max_iter)

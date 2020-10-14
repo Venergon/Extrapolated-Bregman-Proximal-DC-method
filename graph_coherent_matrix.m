@@ -1,4 +1,4 @@
-% Graph ExtendedProximalDCMethod using a highly coherent randomly generated matrix of size
+% Graph ExtrapolatedProximalDCMethod using a highly coherent randomly generated matrix of size
 % nXm, with some gaussian noise
 close all;
 
@@ -94,7 +94,7 @@ for penalty_function_no = 1:length(penalty_functions)
             stop_fn = @(x_prev, x_curr, iteration)(stop_fn_base(obj_fn, rtol, x0, x_prev, x_curr, iteration));
 
             tic
-            x_approx = ExtendedProximalDCMethod(f, df, L, x0, dg, argmin_fn, stop_fn);
+            x_approx = ExtrapolatedProximalDCMethod(f, df, L, x0, dg, argmin_fn, stop_fn);
             t(i) = t(i) + toc;
             dense(i) = dense(i) + nnz(truncate(x_approx, threshold));
             diff(i) = diff(i) + norm(x_approx - x_hat, 2);

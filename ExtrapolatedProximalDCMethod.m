@@ -1,7 +1,7 @@
-function [x] = ExtendedProximalDCMethod(f, df, L, x0, dg_2, calculate_argmin, stop_fn)
-% Extended Proximal DC Method: Find an approximation to the minimum of
+function [x] = ExtrapolatedProximalDCMethod(f, df, L, x0, dg_2, calculate_argmin, stop_fn)
+% Extrapolated Proximal DC Method: Find an approximation to the minimum of
 % f(x) + lambda*(g_1(x) - g_2(x))
-% using the Extended Proximal DC method
+% using the Extrapolated Proximal DC method
 % 
 % Inputs:
 %  f : the objective function

@@ -56,7 +56,7 @@ for penalty_function_no = 1:length(penalty_functions)
         x0 = get_toy_sol_for_param(t);
         
         stop_fn = @(x_prev, x_curr, iteration)(stop_fn_base(obj_fn, rtol, x0, x_prev, x_curr, iteration));
-        x_approx = ExtendedProximalDCMethod(f, df, L, x0, dg, argmin_fn, stop_fn);
+        x_approx = ExtrapolatedProximalDCMethod(f, df, L, x0, dg, argmin_fn, stop_fn);
         b_approx = A*x_approx;
 
         obj_ideal = obj_fn(x_ideal);
