@@ -6,7 +6,7 @@ lambda = 2e-5;
 threshold_iterations = 100;
 rtol = 1e-4;
 max_iter = 200;
-weighting = 6e4;
+weighting = 9000;
 
 
 close all;
