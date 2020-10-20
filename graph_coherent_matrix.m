@@ -1,5 +1,6 @@
-% Graph ExtrapolatedProximalDCMethod using a highly coherent randomly generated matrix of size
-% nXm, with some gaussian noise
+% Graph ExtrapolatedProximalDCMethod using a highly coherent randomly generated matrix, with some gaussian noise
+% Plot the time taken, density and closeness to the optimal solution with
+% respect to the number of rows of A
 close all;
 
 rng_seed = 0;
@@ -27,7 +28,7 @@ M_arctan = (3*alpha_arctan^2*beta_arctan^(2/3))/(4*gamma_arctan);
 
 n_values = 100:100:4000;
 
-% Truncate all elements below this threshold7
+% Truncate all elements below this threshold
 threshold = 0.1;
 
 repeats = 10;
@@ -76,11 +77,6 @@ for penalty_function_no = 1:length(penalty_functions)
             A = A_base + A_noise;
 
             x_hat = sprand(m, 1, density);
-
-            % Normalise x_hat to have maximum magnitude of 1
-            %if (norm(x_hat, Inf) > 1)
-            %    x_hat = x_hat ./ norm(x_hat, Inf);
-            %end
             b_hat = A*x_hat;
 
             noise = normrnd(noise_mu, noise_sigma, n, 1);

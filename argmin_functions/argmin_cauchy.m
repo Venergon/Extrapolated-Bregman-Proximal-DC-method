@@ -9,8 +9,7 @@ function [x] = argmin_cauchy(df, dD, w, xi, L, t, x_prev, lambda, thresholding_i
 % (2*M + L)x_i^3 + (df(w) - xi - L*w_i)x_i^2 + (2 + 2*M*gamma + gamma*L)x_i
 % + (gamma*df(w) - xi*gamma - gamma*L*w_i) + (x_i^2 + gamma)/2 * d/dx_i(D(x, x_prev))= 0 as the stationary point
 
-% TODO: For now we're assuming D(x, x_prev) = 1/2*||x||_2^2, as with other distance formulas we don't necessarily get a polynomial, 
-% will need to make a case for each distance function
+% TODO: For now we're assuming D(x, x_prev) = 1/2*||x||_2^2, as with other bregman divergences we don't necessarily get a polynomial
 df_w = df(w);
 
 M = 2;
@@ -32,8 +31,6 @@ a = a + 1/(t);
 b = b - x_prev/(t);
 c = c + gamma/(t);
 d = d - gamma*x_prev/(t);
-
-%x = fast_solve_cubic(a, b, c, d);
 
 for i=1:length(x)
     sols = trig_solve_cubic(a(i), b(i), c(i), d(i), @(x) 1);

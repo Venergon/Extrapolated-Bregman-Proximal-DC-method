@@ -1,5 +1,6 @@
-% Test ExtrapolatedProximalDCMethod using a randomly generated matrix of size
-% nXm, with some gaussian noise
+% Test ExtrapolatedProximalDCMethod using a randomly generated matrix, with some gaussian noise
+% Plot the values of the solutions to each penalty problem in terms of
+% index, and generate the time taken, closeness and density of each solution
 rng(1);
 
 rtol = 1e-6;
@@ -32,7 +33,6 @@ b = b_hat + noise;
 [f, df, L] = get_objective_function('1D-L2', A, b);
 
 x0 = A \ b;
-% g = ||x||_2, so dg = 
 
 dg_L2 = @(x) lambda*dg_2_norm(x);
 dg_half_L2 = @(x) lambda*dg_2_norm(x)/2;

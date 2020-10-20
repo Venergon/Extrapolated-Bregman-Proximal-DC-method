@@ -13,8 +13,7 @@ function [x] = argmin_arctan(df, dD, w, xi, L, t, x_prev, lambda, thresholding_i
 % 1/t* d/dx(D)
 % = 0 as the stationary point
 
-% TODO: For now we're assuming D(x, x_prev) = 1/2*||x||_2^2, as with other distance formulas we don't necessarily get a polynomial, 
-% will need to make a case for each distance function
+% TODO: For now we're assuming D(x, x_prev) = 1/2*||x||_2^2, as with other bregman divergences we don't necessarily get a polynomial
 df_w = df(w);
 
 M = (2*alpha^2*beta)/(gamma*(1+beta^2));
@@ -85,32 +84,11 @@ for i=1:n
             curr_point = possible_minima(j);
             curr_value = penalty_2D_arctan(curr_point, lambda, alpha, beta, gamma) + lambda*M/2*curr_point^2 + (df_w(i)-xi(i))*(curr_point-w(i)) + L/2*(curr_point - w(i))^2 + 1/(2*t)*(curr_point-x_prev(i))^2;
 
-            %curr_value
             if curr_value < min_value
                 min_value = curr_value;
                 min_point = curr_point;
             end
         end
-        %possible_minima
-        %min_point
-        %x_prev(i)
-
-        %f_pos = @(x) (a_pos(i)*x.^3 + b_pos(i)*x.^2 + c_pos(i)*x + d_pos(i));
-        %f_neg = @(x) (a_neg(i)*x.^3 + b_neg(i)*x.^2 + c_neg(i)*x + d_neg(i));
-
-
-        %pos_vals = f_pos(possible_minima)
-        %neg_vals = f_neg(possible_minima)
-
-        %if (min_point == x_prev(i))
-        %    g = @(x) (lambda*alpha*beta*sign(x)/(gamma) + ((alpha^2*x^2 + 2*alpha*abs(x) + beta^2 + 1))*(M*lambda*x + df(i) - xi(i) + L*(x-w(i)) + 1/t * (x-x_prev(i))));
-        %    y = fzero(g, 0)
-        %    g(y)
-        %    f_pos(y)
-        %    f_neg(y)
-        %    diff = @(x)((g(x) - g(0)) - (f_pos(x) - f_pos(0)));
-        %    error('dsgfdgs');
-        %end
 
         x(i) = min_point;
     else

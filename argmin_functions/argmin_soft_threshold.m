@@ -2,7 +2,7 @@ function [x] = argmin_soft_threshold(df, dD, w, xi, L, t, x_prev, lambda, thresh
 % Calculates a value x \in argmin_{x} {lambda*|x|_1 + <\nabla f(w_k) - xi_k, x - w_k> +
 % L/2*||x - w_k||_2^2 + 1/t_k*(D(x - x_curr))
 % Where f(x) = 1/2 * ||Ax - b||^2
-% And D is a distance function (currently ||x - y||_2 distance)
+% And D is a bregman divergence (currently ||x - y||_2 distance)
 
 % Solve using soft thresholding from https://angms.science/doc/CVX/ISTA0.pdf
 % Let h(x) = <\nabla f(w_k) - xi_k, x - w_k> +
@@ -25,12 +25,6 @@ for iteration = 1:thresholding_iterations
     inner_vector = x - step_size*dh(x);
 
     x = sign(inner_vector).*max((abs(inner_vector) - lambda*step_size), 0);
-end
-
-obj_fn = @(x) (lambda*sum(abs(x), 'all') + trace((df_w - xi)'*(x-w)) + L/2*(norm(x-w, 'fro')^2) + (1/t) * (1/2) * (norm(x-x_prev, 'fro')^2));
-
-if obj_fn(x) > obj_fn(x_prev)
-    fprintf("Error: SOFT THRESHOLDING ended with higher objective value\n\n");
 end
 
 end

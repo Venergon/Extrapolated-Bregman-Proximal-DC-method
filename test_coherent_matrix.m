@@ -1,5 +1,7 @@
-% Test ExtrapolatedProximalDCMethod using a highly coherent randomly generated matrix of size
-% nXm, with some gaussian noise
+% Test ExtrapolatedProximalDCMethod using a highly coherent randomly generated matrix, with some gaussian noise
+% Plot the values of the solutions to each penalty problem in terms of
+% index, and generate the time taken, closeness and density of each solution
+
 rtol = 1e-6;
 lambda = 10;
 n = 2048;
@@ -36,10 +38,6 @@ A_noise = matrix_noise*rand(n, m);
 A = A_base + A_noise;
 
 x_hat = sprand(m, 1, density);
-% Normalise x_hat to have maximum magnitude of 1
-%if (norm(x_hat, Inf) > 1)
-%    x_hat = x_hat ./ norm(x_hat, Inf);
-%end
 b_hat = A*x_hat;
 
 noise = normrnd(noise_mu, noise_sigma, n, 1);
@@ -48,7 +46,6 @@ b = b_hat + noise;
 [f, df, L] = get_objective_function('1D-L2', A, b);
 
 x0 = A \ b;
-% g = ||x||_2, so dg = 
 
 dg_L2 = @(x) lambda*dg_2_norm(x);
 dg_half_L2 = @(x) lambda*dg_2_norm(x)/2;
@@ -153,7 +150,7 @@ plot(indices, x_L1_L2, 'x', 'DisplayName', 'L1 - L2');
 plot(indices, x_L1, 'x', 'DisplayName', 'L1');
 plot(indices, x_MCP, 'x', 'DisplayName', 'MCP');
 plot(indices, x_SCAD, 'x', 'DisplayName', 'SCAD');
-%plot(indices, x_TL1, 'x', 'DisplayName', 'TL1');
+plot(indices, x_TL1, 'x', 'DisplayName', 'TL1');
 plot(indices, x_cauchy, 'x', 'DisplayName', 'Cauchy priory');
 plot(indices, truncate(x_arctan, threshold), 'x', 'DisplayName', 'Arctan');
 plot(indices, x_L1_half_L2, 'x', 'DisplayName', 'L1-1/2*L2');

@@ -1,8 +1,6 @@
 function [x] = trig_solve_cubic(a, b, c, d, cond)
 % Given a cubic equation of the form ax^3 + bx^2 + cx + d, get a real root
 % of that equation, matching the given condition
-% Gives a warning if there is more than one real root matching the
-% condition
 
 % Inputs:
 %  a: coefficient of x^3

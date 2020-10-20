@@ -1,3 +1,7 @@
+% Generate blurred image with random noise, and solve using L_{1, 1}, L_{1,
+% 1} - L_{2, 2}, ISTA and FISTA algorithms
+% Display all solutions as images
+
 lambda = 2e-5;
 threshold_iterations = 100;
 rtol = 1e-4;

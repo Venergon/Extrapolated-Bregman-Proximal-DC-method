@@ -16,8 +16,6 @@ function [x] = ExtrapolatedProximalDCMethod(f, df, L, x0, dg_2, calculate_argmin
 % 
 % Outputs:
 %  x : estimate for the minimizer for the above equation
-%
-% Uses Algorithm 2 in https://www.overleaf.com/project/5eeb8a66da60180001e536fe
 
 % Initialise parameters
 % x_curr = x_k (x_0 initially)
@@ -27,12 +25,10 @@ x_prev = x_curr;
 
 % Set the parameters for the extapolation parameter, based on the method to pick kappa in 
 % remark 3.2 in https://arxiv.org/pdf/2003.04124.pdf
-% Choose alpha_max as close as possible to 1 without reaching 1
-alpha_max = 1;%0.99;
+alpha_max = 1;
 nu_prev = 1;
 nu_curr = (1 + sqrt(1 + 4*nu_prev^2))/2;
 n0 = 10000;
-max_diff = 0;
 
 first_iteration = true;
 % Iterate until the stopping condition is reached, ignoring the first
@@ -55,7 +51,6 @@ while ~isnan(x_curr(1)) && ((~stop_fn(x_prev, x_curr, iteration)) || (first_iter
     end
     
     alpha = alpha_max * (nu_prev - 1)/nu_curr;
-    %alpha = 0;
     
     w = x_curr + alpha.*(x_curr - x_prev);
     

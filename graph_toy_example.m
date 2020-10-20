@@ -1,4 +1,5 @@
-% The 'toy' example in https://arxiv.org/pdf/1812.08852.pdf
+% Graph the solutions to the 'toy' example in https://arxiv.org/pdf/1812.08852.pdf
+% With various penalty functions and initial points
 
 rtol = 1e-10;
 lambda = 0.1;
