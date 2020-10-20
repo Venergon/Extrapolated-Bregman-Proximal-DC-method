@@ -6,7 +6,7 @@ close all;
 lambda = 2e-5;
 threshold_iterations = 100;
 rtol = 1e-4;
-max_iter = 100000000;
+max_iter = 1000;
 
 weightings = 0:1000:1e4;
 psnrs = zeros(size(weightings));
@@ -62,3 +62,7 @@ for i=1:length(weightings)
 end
 
 plot(weightings, psnrs);
+
+title('PSNR For Recovered Images At 1000 Iterations With Different Values of alpha');
+xlabel('alpha');
+ylabel('PSNR of recovered image');
