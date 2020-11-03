@@ -2,7 +2,7 @@
 % Plot the values of the solutions to each penalty problem in terms of
 % index, and generate the time taken, closeness and density of each solution
 
-rtol = 1e-6;
+rtol = 1e-10;
 lambda = 10;
 n = 2048;
 m = 1024;
@@ -140,7 +140,7 @@ t_TL1 = toc
 
 
 % Truncate all elements below this threshold
-threshold = 0.1;
+threshold = 0.01;
 
 % Plot the values of each version of x to see how close they are
 indices = 1:m;

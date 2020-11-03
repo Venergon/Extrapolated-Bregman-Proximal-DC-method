@@ -7,7 +7,7 @@ rng_seed = 0;
 
 rng(rng_seed);
 
-rtol = 1e-6;
+rtol = 1e-10;
 lambda = 10;
 m = 1024;
 matrix_noise = 0.1;
@@ -29,9 +29,9 @@ M_arctan = (3*alpha_arctan^2*beta_arctan^(2/3))/(4*gamma_arctan);
 n_values = 100:100:4000;
 
 % Truncate all elements below this threshold
-threshold = 0.1;
+threshold = 0.01;
 
-repeats = 10;
+repeats = 5;
 
 t_fig = figure();
 hold on;
@@ -122,7 +122,7 @@ xlabel('Rows of A');
 figure(dense_fig);
 title('Average density');
 legend('Location', 'NorthEast');
-ylabel('Average density (# entries > 0.1)');
+ylabel('Average density (# entries > 0.01)');
 xlabel('Rows of A');
 
 figure(diff_fig);
