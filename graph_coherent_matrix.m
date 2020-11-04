@@ -31,7 +31,7 @@ n_values = 100:100:4000;
 % Truncate all elements below this threshold
 threshold = 0.01;
 
-repeats = 5;
+repeats = 10;
 
 t_fig = figure();
 hold on;
