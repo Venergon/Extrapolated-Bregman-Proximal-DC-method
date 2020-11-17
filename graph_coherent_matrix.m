@@ -129,3 +129,4 @@ figure(diff_fig);
 title('Average diff');
 legend('Location', 'NorthEast');
 ylabel('Average diff (2 norm of $x - \hat{x}$)', 'Interpreter', 'latex');
+xlabel('Rows of A');

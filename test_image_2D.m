@@ -101,6 +101,23 @@ imshow(x_fista, []);
 title(sprintf('FISTA (%d iterations),\nPSNR = %2.2f dB', max_iter, psnr(x_fista, X)), 'interpreter', 'latex');
 
 
+figure()
+subplot(1, 2, 1);
+imshow(x_pg, []);
+title(sprintf('ISTA (%d iterations),\nPSNR = %2.2f dB', max_iter, psnr(x_pg, X)), 'interpreter', 'latex');
+
+subplot(1, 2, 2);
+imshow(x_L1,[]);
+title(sprintf('$L_{1,1}$ penalty (%d iterations),\nPSNR = %2.2f dB', max_iter, psnr(x_L1, X)), 'interpreter', 'latex');
+
+figure()
+subplot(1, 2, 1);
+imshow(x_fista, []);
+title(sprintf('FISTA (%d iterations),\nPSNR = %2.2f dB', max_iter, psnr(x_fista, X)), 'interpreter', 'latex');
+
+subplot(1, 2, 2);
+imshow(x_L1,[]);
+title(sprintf('$L_{1,1}$ penalty (%d iterations),\nPSNR = %2.2f dB', max_iter, psnr(x_L1, X)), 'interpreter', 'latex');
 
 diff_less = norm(x_pg_less - x_L1, inf)
 diff = norm(x_pg - x_L1, inf)
